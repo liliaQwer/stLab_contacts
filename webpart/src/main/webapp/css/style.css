@@ -1,0 +1,71 @@
+body {
+    background-color: #eee;/*#fafafa;*/
+    font-family: Arial;
+}
+#mainContainer{
+    margin: 10px;
+}
+table{
+    width: 100%;
+    background-color: white;
+    border: 1px double #d8d4d4;
+    border-collapse: collapse;
+    margin: 15px 0px;
+}
+tr:hover{
+    background-color: #eee;
+}
+td,th{
+    border: 1px double #d8d4d4;
+    padding: 10px;
+}
+th{
+    color: #6a99ed;
+    background-color: #eee;
+}
+.controls, #pagingBlock, #controlButtonsBlock, #deleteBlock{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+#pageSizeSelectBlock{
+    display: flex;
+    align-items: baseline;
+}
+#pageSizeSelect{
+    border-radius: 5px;
+    padding: 5px;
+    margin-left: 5px;
+    outline: none;
+}
+.button{
+    border-radius: 5px;
+    background-color: #d5d3d3;/*#e0e1e4*/
+    padding: 10px;
+    color: #565656;
+}
+.button:not(.disabledBtn):hover{
+    background-color: #aec6ef;
+    cursor: pointer;
+}
+.pageNumber{
+    cursor: default;
+    background-color: #aec6ef;
+}
+.marginLeft5{
+    margin-left: 5px;
+}
+.marginLeft25{
+    margin-left: 25px;
+}
+.hidden{
+    display: none;
+}
+.editImage {
+    width: 15px;
+    height: 15px;
+}
+.link{
+    cursor:pointer;
+}

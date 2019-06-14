@@ -4,7 +4,10 @@ import dao.ContactDAO;
 import dao.DAO;
 import model.ContactModel;
 import model.Model;
+import utils.ApplicationException;
+import utils.LastPageCounter;
 import view.ContactShortView;
+import view.ContactsPageView;
 import view.View;
 
 import javax.sql.DataSource;
@@ -19,38 +22,28 @@ public class ContactService {
         this.dataSource = dataSource;
     }
 
-    public List<View> getContactListPage(int pageNumber, int pageSize){
+    public ContactsPageView getContactListPage(int pageNumber, int pageSize) throws ApplicationException {
         DAO dao;
-        List<Model> modelList;
+        ContactsPageView pageView = null;
+        dao = new ContactDAO(dataSource);
+        System.out.println("dao");
+        List<Model> modelList = dao.getModelListPage(pageNumber, pageSize);
+        System.out.println("modelList");
         List<View> viewList = new ArrayList<>();
-        try {
-            dao = new ContactDAO(dataSource);
-            System.out.println("dao");
-            modelList = dao.getModelListPage(pageNumber, pageSize);
-            System.out.println("modelList");
-            for (Model model : modelList) {
-                View view = new ContactShortView((ContactModel) model);
-                viewList.add(view);
-            }
-        }catch (SQLException e) {
-            System.out.println("sqlException");
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println("Exception");
-            e.printStackTrace();
+        for (Model model : modelList) {
+            View view = new ContactShortView((ContactModel) model);
+            viewList.add(view);
         }
-        return viewList;
+        int contactsCount = dao.getModelListCount();
+        pageView = new ContactsPageView(viewList, pageNumber, pageSize, contactsCount);
+        return pageView;
     }
 
-    public void deleteContact(String idListStr){
-        try {
-            DAO dao = new ContactDAO(dataSource);
-            String[] idList = idListStr.split(",");
-            for (String id: idList){
-                dao.deleteById(Integer.parseInt(id));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void deleteContact(String idListStr) throws ApplicationException {
+        DAO dao = new ContactDAO(dataSource);
+        String[] idList = idListStr.split(",");
+        for (String id: idList){
+            dao.deleteById(Integer.parseInt(id));
         }
     }
 }

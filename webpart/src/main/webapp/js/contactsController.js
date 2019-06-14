@@ -1,117 +1,189 @@
-var pageConstants ={
-    PAGE_NUMBER_DEFAULT: 1,
-    PAGE_SIZE_DEFAULT: 10,
-    PREVIOUS_PAGE: "prev",
-    NEXT_PAGE: "next",
-    URL:  "contact"
-};
-var controller = new ContactsController();
+var contactsController = (function (appConstants) {
 
-function ContactsController() {
-    this.messageErrorElement = document.getElementById("messageError");
-    this.containerElement = document.getElementById("mainContainer");
-    this.mustacheTemplates = {
-        contactsList: document.getElementById("contactsListTemplate").innerHTML
-    };
-    this.pageSize = 10;
-    this.currentPage = 0;
-    this.contactsList = {};
-    this.ERROR_MESSAGE = "Error occurred during request";
-    this.showMessageError = function(error){
-        this.messageErrorElement.innerText = error;
-    };
-    this.showContactsList = function(nextPageNumber){
-        var _this = this;
+    var _messageErrorElement,
+        _containerElement,
+        _pageSizeSelector,
+        _mustacheTemplate,
+        _pageSize,
+        _pageSizeOptions,
+        _currentPage,
+        _totalContacts,
+        _contactsList,
+        _errorMessage,
+        _goNextPageButton,
+        _goPrevPageButton,
+        _goFirstPageButton,
+        _goLastPageButton,
+        _deleteContactGridButtons,
+        _deleteContactsButton,
+        _addContactButton,
+        _sendEmailButton,
+        _callbacks;
+
+
+    function init() {
+        _messageErrorElement = document.getElementById("messageError");
+        _containerElement = document.getElementById("mainContainer");
+
+        _mustacheTemplate = document.getElementById("contactsListTemplate").innerHTML;
+
+        _pageSize = appConstants.PAGE_SIZE_DEFAULT;
+        _currentPage = 0;
+        _contactsList = {};
+        _totalContacts = 0;
+        _pageSizeOptions = [
+            {val: 10, text: "10 items"},
+            {val: 20, text: "20 items"}
+        ];
+        _errorMessage = appConstants.ERROR_MESSAGE;
+        showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
+    }
+
+    function showContactsList(nextPageNumber) {
         if (!nextPageNumber) {
-            nextPageNumber = _this.currentPage;
+            nextPageNumber = _currentPage;
         }
-        fetch(pageConstants.URL + "?pageNumber=" + nextPageNumber + "&pageSize=" + _this.pageSize)
-            .then(function(response) {
-                if (response.ok){
+        fetch(appConstants.URL.contact + "?pageNumber=" + nextPageNumber + "&pageSize=" + _pageSize)
+            .then(function (response) {
+                if (response.ok) {
                     return response.json();
                 }
                 throw new Error(_this.ERROR_MESSAGE);
             })
-            .then(function(data) {
-                _this.contactsList.list = data;
-                _this.contactsList.pageNumber = nextPageNumber;
-                _this.currentPage = nextPageNumber;
-                var rendered = Mustache.render(_this.mustacheTemplates.contactsList, _this.contactsList);
-                _this.containerElement.innerHTML = rendered;
-                if (data === null || data.length == 0) {
+            .then(function (data) {
+                if (data.contactsList.length == 0) {
                     throw new Error("There is no data");
                 }
+                _totalContacts = data.totalAmount;
+                _currentPage = nextPageNumber;
+                _contactsList = data;
+                _contactsList.isFirstPage = nextPageNumber <= 1;
+                _contactsList.isLastPage = getLastPage() <= nextPageNumber;
+                var rendered = Mustache.render(_mustacheTemplate, {
+                    contactsList: _contactsList.contactsList,
+                    pageSize: _pageSize,
+                    isFirstPage: _contactsList.isFirstPage,
+                    isLastPage: _contactsList.isLastPage,
+                    pageSizeOptions: _pageSizeOptions,
+                    pageNumber: _currentPage,
+                    pageOptionSelected: function () {
+                        if (this.val == _pageSize) {
+                            return 'selected';
+                        }
+                        return '';
+                    }
+                });
+                _containerElement.innerHTML = rendered;
+                assignEvents();
             })
-            .catch(function(error) {
-                _this.showMessageError(error);
+            .catch(function (error) {
+                showMessageError(error);
             });
-        console.log("this.currentPage = " + this.currentPage);
+        log("currentPage = " + _currentPage);
+    }
 
-    };
-    this.deleteContact = function(idList){
-        var _this = this;
-        fetch(pageConstants.URL + "?id=" + idList,{method: 'delete'})
-            .then(function(response) {
+    function getLastPage() {
+        return Math.ceil(_totalContacts / _pageSize);
+    }
+
+    function showMessageError(error) {
+        _messageErrorElement.innerText = error;
+    }
+
+    function log(message) {
+        console.log(message);
+    }
+
+    function deleteContact(idList) {
+        fetch(appConstants.URL.contact + "?id=" + idList, {method: 'delete'})
+            .then(function (response) {
                 if (response.ok) {
-                    return _this.showContactsList();
+                    return showContactsList();
                 }
-                throw new Error(_this.ERROR_MESSAGE);
+                throw new Error(_errorMessage);
             })
-            .catch( function(error) {
-                _this.showMessageError(error);
-            } );
+            .catch(function (error) {
+                showMessageError(error);
+            });
     }
-}
-window.onload = function() {
-    controller.showContactsList(pageConstants.PAGE_NUMBER_DEFAULT, pageConstants.PAGE_SIZE_DEFAULT);
-};
 
-function deleteContact(id){
-    console.log(id);
-    if (!window.confirm("Are you sure you want to delete selected contact?")){
-        return;
-    }
-    controller.deleteContact(id);
-}
+    function assignEvents() {
+        _pageSizeSelector = document.getElementById("pageSizeSelect");
+        _goNextPageButton = document.getElementById("goNextPage");
+        _goLastPageButton = document.getElementById("goLastPage");
+        _goFirstPageButton = document.getElementById("goFirstPage");
+        _goPrevPageButton = document.getElementById("goPrevPage");
+        _deleteContactGridButtons = document.getElementsByClassName("js-delete-contact");
+        _deleteContactsButton = document.getElementById("deleteContacts");
+        _sendEmailButton = document.getElementById("sendEmail");
+        _addContactButton = document.getElementById("addContact");
 
-function deleteContacts(){
-    var inputElements = document.getElementsByClassName('check');
-    var idList = new Array();
-    for (var i = 0; inputElements[i]; ++i){
-        if (inputElements[i].checked){
-            idList.push(parseInt(inputElements[i].value));
+        for (var i = 0; i < _deleteContactGridButtons.length; i++) {
+            var deleteButton = _deleteContactGridButtons[i];
+            deleteButton.onclick = function (e) {
+                var id = e.currentTarget.dataset.id;
+                log(id);
+                if (!window.confirm("Are you sure you want to delete selected contact?")) {
+                    return;
+                }
+                deleteContact(id);
+            }
+        }
+
+        _deleteContactsButton.onclick = function () {
+            var inputElements = document.getElementsByClassName('check');
+            var idList = new Array();
+            for (var i = 0; inputElements[i]; ++i) {
+                if (inputElements[i].checked) {
+                    idList.push(parseInt(inputElements[i].value));
+                }
+            }
+            if (idList.length == 0) {
+                alert("You should check a contact!");
+                return;
+            }
+            if (!window.confirm("Are you sure you want to delete selected contacts?")) {
+                return;
+            }
+            log(idList.join(","));
+            deleteContact(idList.join(","));
+        }
+
+        _addContactButton.onclick = function () {
+            if (_callbacks.onAddContact && typeof _callbacks.onAddContact == 'function') {
+                _callbacks.onAddContact();
+            }
+        }
+
+        _sendEmailButton.onclick = function () {
+            alert("TBD");
+        }
+
+        _pageSizeSelector.onchange = function (e) {
+            _pageSize = e.target.value;
+            showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
+        }
+
+        _goNextPageButton.onclick = function () {
+            showContactsList(_currentPage + 1);
+        }
+        _goLastPageButton.onclick = function () {
+            showContactsList(getLastPage());
+        }
+        _goPrevPageButton.onclick = function () {
+            showContactsList(_currentPage - 1);
+        }
+        _goFirstPageButton.onclick = function () {
+            showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
         }
     }
-    if (idList.length == 0){
-        alert("You should check a contact!");
-        return;
+
+    var _callbacks = {
+        onAddContact: false
+    };
+
+    return {
+        init: init,
+        callbacks: _callbacks
     }
-    if (!window.confirm("Are you sure you want to delete selected contacts?")){
-        return;
-    }
-    console.log(idList.join(","));
-    controller.deleteContact(idList.join(","));
-}
-
-function reloadListByPageSize(pageSizeElement){
-    controller.pageSize = pageSizeElement.value;
-    controller.showContactsList(pageConstants.PAGE_NUMBER_DEFAULT, pageSizeElement.value);
-}
-
-function showNextPage(element){
-    if (element.className.indexOf("disabledBtn") >= 0){
-        return;
-    }
-    controller.showContactsList(controller.currentPage + 1);
-}
-
-function showPrevPage(element){
-    if (element.className.indexOf("disabledBtn") >= 0){
-        return;
-    }
-    controller.showContactsList(controller.currentPage - 1);
-}
-
-function sendEmail(){
-
-}
+})(appConstants);

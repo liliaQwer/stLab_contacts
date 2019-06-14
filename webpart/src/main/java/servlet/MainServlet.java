@@ -7,7 +7,9 @@ import email.EmailTemplate;
 import model.ContactModel;
 import model.Model;
 import service.ContactService;
+import utils.ApplicationException;
 import view.ContactShortView;
+import view.ContactsPageView;
 import view.View;
 
 import javax.annotation.Resource;
@@ -36,10 +38,17 @@ public class MainServlet extends HttpServlet {
         ContactService service = new ContactService(dataSource);
         int pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
         int pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        List<View> viewList = service.getContactListPage(pageNumber, pageSize);
+        ContactsPageView contactsPageView = null;
+        try {
+            contactsPageView = service.getContactListPage(pageNumber, pageSize);
+        } catch (ApplicationException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(response, e);
+            return;
+        }
         System.out.println("gotView");
-        EmailTemplate.getTemplates();
-        sendJsonResponse(response, viewList);
+        //EmailTemplate.getTemplates();
+        sendJsonResponse(response, contactsPageView);
 
 //        try {
 //            new EmailTemplate().sendEmail();
@@ -52,13 +61,19 @@ public class MainServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ContactService service = new ContactService(dataSource);
         System.out.println("doDelete");
-        service.deleteContact(request.getParameter("id"));
-
+        try {
+            service.deleteContact(request.getParameter("id"));
+        } catch (ApplicationException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(response, e);
+            return;
+        }
+        response.setStatus(HttpServletResponse.SC_OK);
         //System.out.println("gotView");
         //sendJsonResponse(response, viewList);
     }
 
-    public void sendJsonResponse(HttpServletResponse response, List<View> view) throws IOException {
+    public void sendJsonResponse(HttpServletResponse response, Object view) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
@@ -67,6 +82,7 @@ public class MainServlet extends HttpServlet {
         System.out.println(mapper.writeValueAsString(view));
         out.flush();
     }
+
 }
     /*
     try {

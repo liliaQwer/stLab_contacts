@@ -1,0 +1,26 @@
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <!--<RollingFile name="LogToRollingFile" fileName="${sys:catalina.home}/logs/contacts_karavaichyk.log"
+                     filePattern="logs/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>-->
+    </Appenders>
+
+    <Loggers>
+        <!--<Logger name= "dao.ContactDAO" level="debug" additivity="true">
+            <AppenderRef ref="Console"/>
+        </Logger>-->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

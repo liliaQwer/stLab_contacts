@@ -12,28 +12,35 @@
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <org.antlr>4.1</org.antlr>
+        <com.sun.mail>1.6.1</com.sun.mail>
+        <javax.mail>1.4</javax.mail>
+        <javax.activation>1.1.1</javax.activation>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>ST4</artifactId>
-            <version>4.1</version>
+            <version>${org.antlr}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
-            <version>1.6.1</version>
+            <version>${com.sun.mail}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.mail/mail -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4</version>
+            <version>${javax.mail}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
-            <version>1.1.1</version>
+            <version>${javax.activation}</version>
         </dependency>
     </dependencies>
 

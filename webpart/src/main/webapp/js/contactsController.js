@@ -1,4 +1,4 @@
-var contactsController = (function (appConstants) {
+App.ContactsController = (function (appConstants) {
 
     var _messageErrorElement,
         _containerElement,
@@ -43,6 +43,7 @@ var contactsController = (function (appConstants) {
         if (!nextPageNumber) {
             nextPageNumber = _currentPage;
         }
+        hideErrorMessage();
         fetch(appConstants.URL.contact + "?pageNumber=" + nextPageNumber + "&pageSize=" + _pageSize)
             .then(function (response) {
                 if (response.ok) {
@@ -87,7 +88,12 @@ var contactsController = (function (appConstants) {
     }
 
     function showMessageError(error) {
+        _messageErrorElement.classList.remove('hidden');
         _messageErrorElement.innerText = error;
+    }
+
+    function hideErrorMessage() {
+        _messageErrorElement.classList.add('hidden');
     }
 
     function log(message) {
@@ -156,7 +162,7 @@ var contactsController = (function (appConstants) {
         }
 
         _sendEmailButton.onclick = function () {
-            alert("TBD");
+            showMessageError("Not implemented");
         }
 
         _pageSizeSelector.onchange = function (e) {
@@ -194,4 +200,4 @@ var contactsController = (function (appConstants) {
         init: init,
         callbacks: _callbacks
     }
-})(appConstants);
+})(App.Constants);

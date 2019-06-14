@@ -1,4 +1,4 @@
-var appConstants = {
+App.Constants = {
     PAGE_NUMBER_DEFAULT: 1,
     PAGE_SIZE_DEFAULT: 10,
     messages: {
@@ -7,6 +7,8 @@ var appConstants = {
         SELECT_CONTACT_WARNING: "You should check a contact!"
     },
     URL: {
-        contact: "contact"
+        contact: "contact",
+        lookups: "lookups",
+        contactInfo: "contactInfo",
     }
 };

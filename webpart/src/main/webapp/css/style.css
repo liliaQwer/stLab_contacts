@@ -29,11 +29,16 @@ th {
     background-color: #eee;
 }
 
-.controls, #pagingBlock, #controlButtonsBlock, #deleteBlock {
+.controls, #pagingBlock, #controlButtonsBlock, #phoneControlsButtonsBlock, #deleteBlock {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-end;
+}
+
+#phoneControlsButtonsBlock {
+    justify-content: flex-end;
+    flex-grow: 1;
 }
 
 #pageSizeSelectBlock {
@@ -75,6 +80,10 @@ th {
     margin-left: 25px;
 }
 
+.marginBottom5 {
+    margin-bottom: 5px;
+}
+
 .hidden {
     display: none;
 }
@@ -86,4 +95,77 @@ th {
 
 .link {
     cursor: pointer;
+}
+
+.error, .warning {
+    padding: 5px;
+    margin: 2px 0;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.error {
+    background-color: #DC143C;
+}
+
+.warning {
+    background-color: #ffa500;
+}
+
+/* form */
+
+fieldset {
+    border-radius: 5px;
+}
+
+fieldset legend {
+    font-weight: bold;
+}
+
+.form-group {
+    display: flex;
+    align-items: baseline;
+    margin: 10px 0px;
+}
+
+.form-group label {
+    flex-basis: 120px;
+}
+
+.form-group input, .form-group select {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-right: 3px solid #ccc;
+}
+
+.form-group input, .form-group select {
+    flex-basis: 200px;
+}
+
+.form-group input:required {
+    border-right-color: #0ffb0e;
+}
+
+.form-group input:optional {
+    border-right-color: #ccc;
+}
+
+.form-group input:invalid {
+    border-right-color: #cc080f;
+}
+
+
+/* flex */
+
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
 }

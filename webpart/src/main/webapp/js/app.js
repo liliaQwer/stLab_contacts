@@ -1,6 +1,6 @@
 (function (appConstants, contactsController, editContactController) {
     window.onload = function () {
-        contactsController.init();
+        editContactController.init();
         contactsController.callbacks.onAddContact = function () {
             editContactController.init();
         };
@@ -8,4 +8,4 @@
             contactsController.init();
         }
     };
-})(appConstants, contactsController, editContactController);
+})(App.Constants, App.ContactsController, App.EditContactController);

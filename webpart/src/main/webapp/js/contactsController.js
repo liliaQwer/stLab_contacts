@@ -35,7 +35,7 @@ var contactsController = (function (appConstants) {
             {val: 10, text: "10 items"},
             {val: 20, text: "20 items"}
         ];
-        _errorMessage = appConstants.ERROR_MESSAGE;
+        _errorMessage = appConstants.messages.ERROR_MESSAGE;
         showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
     }
 
@@ -48,7 +48,7 @@ var contactsController = (function (appConstants) {
                 if (response.ok) {
                     return response.json();
                 }
-                throw new Error(_this.ERROR_MESSAGE);
+                throw new Error(_errorMessage);
             })
             .then(function (data) {
                 if (data.contactsList.length == 0) {
@@ -139,10 +139,10 @@ var contactsController = (function (appConstants) {
                 }
             }
             if (idList.length == 0) {
-                alert("You should check a contact!");
+                alert(appConstants.messages.SELECT_CONTACT_WARNING);
                 return;
             }
-            if (!window.confirm("Are you sure you want to delete selected contacts?")) {
+            if (!window.confirm(appConstants.messages.DELETE_CONTACT_CONFIRMATION)) {
                 return;
             }
             log(idList.join(","));
@@ -164,21 +164,29 @@ var contactsController = (function (appConstants) {
             showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
         }
 
-        _goNextPageButton.onclick = function () {
-            showContactsList(_currentPage + 1);
+        if (_goNextPageButton) {
+            _goNextPageButton.onclick = function () {
+                showContactsList(_currentPage + 1);
+            }
         }
-        _goLastPageButton.onclick = function () {
-            showContactsList(getLastPage());
+        if (_goLastPageButton) {
+            _goLastPageButton.onclick = function () {
+                showContactsList(getLastPage());
+            }
         }
-        _goPrevPageButton.onclick = function () {
-            showContactsList(_currentPage - 1);
+        if (_goPrevPageButton) {
+            _goPrevPageButton.onclick = function () {
+                showContactsList(_currentPage - 1);
+            }
         }
-        _goFirstPageButton.onclick = function () {
-            showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
+        if (_goFirstPageButton) {
+            _goFirstPageButton.onclick = function () {
+                showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
+            }
         }
     }
 
-    var _callbacks = {
+    _callbacks = {
         onAddContact: false
     };
 

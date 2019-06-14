@@ -28,7 +28,7 @@ var editContactController = (function (appConstants) {
         }
     }
 
-    var _callbacks = {
+    _callbacks = {
         onCancel: false
     }
 

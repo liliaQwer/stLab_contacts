@@ -13,7 +13,7 @@
 <div id="mainContainer"></div>
 <p id="messageError" class="error"></p>
 
-<script type="template/mustache" id="cont   actsListTemplate">
+<script type="template/mustache" id="contactsListTemplate">
     <h1>Contacts List</h1>
     <div class="controls">
         <div id="pageSizeSelectBlock">

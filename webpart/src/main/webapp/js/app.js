@@ -1,4 +1,4 @@
-(function (appConstants, contactsController) {
+(function (appConstants, contactsController, editContactController) {
     window.onload = function () {
         contactsController.init();
         contactsController.callbacks.onAddContact = function () {

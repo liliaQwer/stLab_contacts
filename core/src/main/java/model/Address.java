@@ -1,6 +1,6 @@
 package model;
 
-public class AddressModel extends Model {
+public class Address {
     private int id;
     private String index;
     private String street;

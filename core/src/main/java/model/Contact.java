@@ -2,16 +2,16 @@ package model;
 
 import java.util.Date;
 
-public class ContactModel extends Model {
+public class Contact {
     private int id;
     private String name;
     private String surName;
     private String lastName;
     private Date birthDay;
     private String company;
-    private AddressModel address;
+    private Address address;
 
-    public ContactModel() {
+    public Contact() {
 
     }
 
@@ -63,11 +63,11 @@ public class ContactModel extends Model {
         this.company = company;
     }
 
-    public AddressModel getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(AddressModel address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 }

@@ -14,7 +14,7 @@ App.ContactsController = (function (appConstants) {
         _goPrevPageButton,
         _goFirstPageButton,
         _goLastPageButton,
-        _deleteContactGridButtons,
+        _deleteContactButtons,
         _deleteContactsButton,
         _addContactButton,
         _sendEmailButton,
@@ -52,9 +52,6 @@ App.ContactsController = (function (appConstants) {
                 throw new Error(_errorMessage);
             })
             .then(function (data) {
-                if (data.contactsList.length == 0) {
-                    throw new Error("There is no data");
-                }
                 _totalContacts = data.totalAmount;
                 _currentPage = nextPageNumber;
                 _contactsList = data;
@@ -101,7 +98,7 @@ App.ContactsController = (function (appConstants) {
     }
 
     function deleteContact(idList) {
-        fetch(appConstants.URL.contact + "?id=" + idList, {method: 'delete'})
+        fetch(appConstants.URL.contact + "/" + idList, {method: 'delete'})
             .then(function (response) {
                 if (response.ok) {
                     return showContactsList();
@@ -119,13 +116,13 @@ App.ContactsController = (function (appConstants) {
         _goLastPageButton = document.getElementById("goLastPage");
         _goFirstPageButton = document.getElementById("goFirstPage");
         _goPrevPageButton = document.getElementById("goPrevPage");
-        _deleteContactGridButtons = document.getElementsByClassName("js-delete-contact");
+        _deleteContactButtons = document.getElementsByClassName("deleteContact");
         _deleteContactsButton = document.getElementById("deleteContacts");
         _sendEmailButton = document.getElementById("sendEmail");
         _addContactButton = document.getElementById("addContact");
 
-        for (var i = 0; i < _deleteContactGridButtons.length; i++) {
-            var deleteButton = _deleteContactGridButtons[i];
+        for (var i = 0; i < _deleteContactButtons.length; i++) {
+            var deleteButton = _deleteContactButtons[i];
             deleteButton.onclick = function (e) {
                 var id = e.currentTarget.dataset.id;
                 log(id);

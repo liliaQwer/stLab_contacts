@@ -52,14 +52,16 @@
                         <span>
                             <img src="img/edit.png" alt="Edit contact" class="editImage">
                         </span>
-                    <span class="link js-delete-contact" data-id="{{id}}">
-                            <img src="img/delete.png" alt="Edit contact" class="editImage marginLeft25">
+                    <span class="link deleteContact" data-id="{{id}}">
+                            <img src="img/delete.png" alt="Delete contact" class="editImage marginLeft25">
                         </span>
                 </td>
             </tr>
             {{/contactsList}}
         </table>
-
+        {{^contactsList}}
+            <div class="warning">There are no contacts</div>
+        {{/contactsList}}
     </div>
     <div class="controls">
         <div id="deleteBlock">
@@ -128,7 +130,7 @@
                 <div class="flex-grow-1">
                     <div class="form-group">
                         <label for="marital_status">Marital status:</label>
-                        <select id="marital_status" placeholder="Select marital status">
+                        <select id="marital_status">
                             <option value="" disabled selected>Select marital status</option>
                             {{#maritalStatusList}}
                             <option value="{{id}}" {{maritalStatusSelected}}>{{name}}</option>
@@ -193,8 +195,6 @@
                             <div class="button marginLeft5" id="addPhone">Add Phone</div>
                             {{#hasPhones}}
                             <div class="button marginLeft5" id="editPhone">Edit Phone</div>
-                            {{/hasPhones}}
-                            {{#hasPhones}}
                             <div class="button marginLeft5" id="removePhone">Delete Phone</div>
                             {{/hasPhones}}
                         </div>
@@ -226,6 +226,7 @@
                 {{/phoneInfo}}
             </div>
         </fieldset>
+        <input type="submit" value="Save" />
     </form>
 
     <input type="button" class="button" id="cancelButton" value="Cancel"/>

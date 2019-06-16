@@ -7,7 +7,7 @@ App.Constants = {
         SELECT_CONTACT_WARNING: "You should check a contact!"
     },
     URL: {
-        contact: "contact",
+        contact: "contacts",
         lookups: "lookups",
         contactInfo: "contactInfo",
     }

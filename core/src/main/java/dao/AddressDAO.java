@@ -1,7 +1,6 @@
 package dao;
 
-import model.AddressModel;
-import model.Model;
+import model.Address;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
@@ -10,33 +9,18 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.List;
 
-public class AddressDAO implements DAO<AddressModel>{
+public class AddressDAO implements DAO<Address>{
     private DataSource dataSource;
     private final static Logger logger = LogManager.getLogger(AddressDAO.class);
     //private Connection conn;
 
-    public AddressDAO(DataSource dataSource) throws ApplicationException {
+    public AddressDAO(DataSource dataSource){
         this.dataSource = dataSource;
-        //conn = dataSource.getConnection();
-    }
-    @Override
-    public void beginTransaction() throws ApplicationException {
-
     }
 
     @Override
-    public void rollback() throws ApplicationException {
-
-    }
-
-    @Override
-    public void commit() throws ApplicationException {
-
-    }
-
-    @Override
-    public Model getModelById(int id) throws ApplicationException {
-        AddressModel model = new AddressModel();
+    public Address get(int id) throws ApplicationException {
+        Address model = new Address();
         String query = "select * from address where contact_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement st = connection.prepareStatement(query)){
@@ -58,32 +42,32 @@ public class AddressDAO implements DAO<AddressModel>{
     }
 
     @Override
-    public List<? extends Model> getModelListPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<Address> getPage(int pageNumber, int pageSize) throws ApplicationException {
         return null;
     }
 
     @Override
-    public int getModelListCount() throws ApplicationException {
+    public int getCount() throws ApplicationException {
         return 0;
     }
 
     @Override
-    public List<Model> getModelList() {
+    public List<Address> getList() {
         return null;
     }
 
     @Override
-    public void edit(AddressModel o) {
-
+    public int update(Address o) {
+        return 0;
     }
 
     @Override
-    public void deleteById(int id) {
-
+    public int delete(int id) {
+        return 0;
     }
 
     @Override
-    public void save(AddressModel o) {
-
+    public int save(Address o) {
+        return 0;
     }
 }

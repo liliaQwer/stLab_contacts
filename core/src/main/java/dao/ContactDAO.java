@@ -1,8 +1,7 @@
 package dao;
 
-import model.AddressModel;
-import model.ContactModel;
-import model.Model;
+import model.Address;
+import model.Contact;
 import org.apache.logging.log4j.LogManager;
 import utils.ApplicationException;
 import utils.ContactStatus;
@@ -14,41 +13,22 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.logging.log4j.Logger;
 
-public class ContactDAO implements DAO<ContactModel>{
+public class ContactDAO implements DAO<Contact>{
     private DataSource dataSource;
     private final static Logger logger = LogManager.getRootLogger();
 
-    public ContactDAO(DataSource dataSource) throws ApplicationException {
+    public ContactDAO(DataSource dataSource){
         this.dataSource = dataSource;
-        //conn = dataSource.getConnection();
     }
 
     @Override
-    public void beginTransaction() throws ApplicationException {
-        //conn.setAutoCommit(false);
-    }
-
-    @Override
-    public void rollback() throws ApplicationException {
-        //conn.rollback();
-        //conn.setAutoCommit(true);
-    }
-
-    @Override
-    public void commit() throws ApplicationException {
-        //conn.commit();
-        //conn.setAutoCommit(true);
-    }
-
-    @Override
-    public ContactModel getModelById(int id) throws ApplicationException {
+    public Contact get(int id) throws ApplicationException {
         return null;
     }
 
     @Override
-    public List<ContactModel> getModelListPage(int pageNumber, int pageSize) throws ApplicationException {
-        List<ContactModel> modelList = new ArrayList<>();
-        AddressDAO addressDAO = new AddressDAO(dataSource);
+    public List<Contact> getPage(int pageNumber, int pageSize) throws ApplicationException {
+        List<Contact> modelList = new ArrayList<>();
         String query = "select * from contact where active_status = ? limit ?,?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement st = connection.prepareStatement(query)){
@@ -58,15 +38,13 @@ public class ContactDAO implements DAO<ContactModel>{
             logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                ContactModel model = new ContactModel();
+                Contact model = new Contact();
                 model.setId(rs.getInt("id"));
                 model.setName(rs.getString("name"));
                 model.setSurName(rs.getString("surname"));
                 model.setLastName(rs.getString("patronymic"));
                 model.setBirthDay(rs.getDate("birthday"));
                 model.setCompany(rs.getString("company"));
-                Model addressModel = addressDAO.getModelById(model.getId());
-                model.setAddress(addressModel != null ? (AddressModel)addressModel : null);
                 modelList.add(model);
             }
         } catch (Exception e) {
@@ -77,7 +55,7 @@ public class ContactDAO implements DAO<ContactModel>{
     }
 
     @Override
-    public int getModelListCount() throws ApplicationException {
+    public int getCount() throws ApplicationException {
         String query = "select count(*) amount from contact where active_status = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement st = connection.prepareStatement(query)){
@@ -93,17 +71,17 @@ public class ContactDAO implements DAO<ContactModel>{
     }
 
     @Override
-    public List<? extends Model> getModelList() throws ApplicationException {
+    public List<Contact> getList() throws ApplicationException {
         return null;
     }
 
     @Override
-    public void edit(ContactModel o) throws ApplicationException {
-
+    public int update(Contact o) throws ApplicationException {
+        return 0;
     }
 
     @Override
-    public void deleteById(int id) throws ApplicationException {
+    public int delete(int id) throws ApplicationException {
         String query = "update contact set active_status = ? where id = ?";
         int result = 0;
         try (Connection connection = dataSource.getConnection();
@@ -113,18 +91,16 @@ public class ContactDAO implements DAO<ContactModel>{
             logger.info(st.toString());
             result = st.executeUpdate();
             System.out.println("result " + result);
+            return result;
         } catch (Exception e) {
             logger.error(e);
             throw new ApplicationException();
         }
-        if (result == 0) {
-            throw new ApplicationException("No records to delete");
-        }
     }
 
     @Override
-    public void save(ContactModel o) throws ApplicationException {
-
+    public int save(Contact o) throws ApplicationException {
+        return 0;
     }
 
 }

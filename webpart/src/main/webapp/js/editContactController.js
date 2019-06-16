@@ -10,7 +10,6 @@ App.EditContactController = (function (appConstants) {
     function init(contactId) {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
-
         _mustacheTemplate = document.getElementById("contactTemplate").innerHTML;
         _contactData = {
             name: 'lili',

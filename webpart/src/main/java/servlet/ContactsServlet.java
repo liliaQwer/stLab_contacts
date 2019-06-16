@@ -1,19 +1,13 @@
 package servlet;
 
-import dao.ContactDAO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dao.DAO;
-import email.EmailTemplate;
-import model.ContactModel;
-import model.Model;
 import service.ContactService;
+import service.ContactServiceImpl;
 import utils.ApplicationException;
-import view.ContactShortView;
-import view.ContactsPageView;
-import view.View;
+import view.ContactsAndPageInfo;
+import view.ViewHelper;
 
 import javax.annotation.Resource;
-import javax.mail.MessagingException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,34 +15,41 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 
-@WebServlet(urlPatterns = {"/contact"})
-public class MainServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/contacts/*"})
+public class ContactsServlet extends HttpServlet {
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
-    //private ContactService service = new ContactService(dataSource);
+    //private ContactServiceImpl service = new ContactServiceImpl(dataSource);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ContactService service = new ContactService(dataSource);
+        System.out.println("pATH: " + request.getPathInfo());
+        if (request.getPathInfo() == null) {
+            getContactList(request, response);
+        } else {
+            getContact(request, response);
+        }
+    }
+
+    private void getContactList(HttpServletRequest request, HttpServletResponse response){
         int pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
         int pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        ContactsPageView contactsPageView = null;
+        ContactsAndPageInfo contactsPageView = null;
+        ContactService service = new ContactServiceImpl(dataSource);
         try {
-            contactsPageView = service.getContactListPage(pageNumber, pageSize);
+            contactsPageView = ViewHelper.prepareContactsAndPageInfoView(service.getPage(pageNumber, pageSize),
+                    pageNumber, pageSize, service.getCount());
+            sendJsonResponse(response, contactsPageView);
         } catch (ApplicationException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
             return;
         }
-        System.out.println("gotView");
         //EmailTemplate.getTemplates();
-        sendJsonResponse(response, contactsPageView);
+
 
 //        try {
 //            new EmailTemplate().sendEmail();
@@ -57,30 +58,61 @@ public class MainServlet extends HttpServlet {
 //        }
     }
 
+    private void getContact(HttpServletRequest request, HttpServletResponse response)throws IOException {
+
+    }
+
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ContactService service = new ContactService(dataSource);
+        if (request.getPathInfo() == null){
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        ContactServiceImpl service = new ContactServiceImpl(dataSource);
         System.out.println("doDelete");
         try {
-            service.deleteContact(request.getParameter("id"));
+            service.delete(getIdStrFromPath(request));
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (ApplicationException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
-            return;
         }
-        response.setStatus(HttpServletResponse.SC_OK);
         //System.out.println("gotView");
         //sendJsonResponse(response, viewList);
     }
 
-    public void sendJsonResponse(HttpServletResponse response, Object view) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(out, view);
-        System.out.println(mapper.writeValueAsString(view));
-        out.flush();
+    public void sendJsonResponse(HttpServletResponse response, Object view)  {
+        try{
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            PrintWriter out = response.getWriter();
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(out, view);
+            System.out.println(mapper.writeValueAsString(view));
+            out.flush();
+        }catch (IOException e){
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private int getIdFromPath(HttpServletRequest request){
+        String idPath = request.getPathInfo();
+        if (idPath == null){
+            return 0;
+        }
+        try{
+            return Integer.parseInt(idPath.substring(1));
+        }catch(Exception e){
+            return 0;
+        }
+    }
+
+    private String getIdStrFromPath(HttpServletRequest request){
+        String idPath = request.getPathInfo();
+        if (idPath == null){
+            return null;
+        }
+        return idPath.substring(1);
     }
 
 }

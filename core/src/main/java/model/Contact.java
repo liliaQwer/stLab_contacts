@@ -9,7 +9,6 @@ public class Contact {
     private String lastName;
     private Date birthDay;
     private String company;
-    private Address address;
 
     public Contact() {
 
@@ -61,13 +60,5 @@ public class Contact {
 
     public void setCompany(String company) {
         this.company = company;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
     }
 }

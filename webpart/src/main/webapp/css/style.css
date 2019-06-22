@@ -29,14 +29,14 @@ th {
     background-color: #eee;
 }
 
-.controls, #pagingBlock, #controlButtonsBlock, #phoneControlsButtonsBlock, #deleteBlock {
+.controls, #pagingBlock, #controlButtonsBlock, #phoneControlsButtonsBlock, #attachmentsButtonsBlock, #deleteBlock {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-end;
 }
 
-#phoneControlsButtonsBlock {
+#phoneControlsButtonsBlock, #attachmentsButtonsBlock {
     justify-content: flex-end;
     flex-grow: 1;
 }
@@ -60,6 +60,7 @@ th {
     color: #565656;
     border-style: none;
     outline: none;
+    cursor: pointer;
 }
 
 .button:not(.disabledPaging):hover {
@@ -72,8 +73,20 @@ th {
     background-color: #aec6ef;
 }
 
+.width200 {
+    width: 200px;
+}
+
+.margin5 {
+    margin: 5px;
+}
+
 .marginLeft5 {
     margin-left: 5px;
+}
+
+.marginRight5 {
+    margin-right: 5px;
 }
 
 .marginLeft25 {
@@ -112,6 +125,13 @@ th {
     background-color: #ffa500;
 }
 
+.profilePhoto {
+    cursor: pointer;
+    width: 150px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
 /* form */
 
 fieldset {
@@ -132,15 +152,16 @@ fieldset legend {
     flex-basis: 120px;
 }
 
-.form-group input, .form-group select {
+.form-group input, .form-group select, .form-group textarea {
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
     border-right: 3px solid #ccc;
+    flex-basis: 200px;
 }
 
-.form-group input, .form-group select {
-    flex-basis: 200px;
+.form-group textarea {
+    resize: none;
 }
 
 .form-group input:required {
@@ -166,6 +187,14 @@ fieldset legend {
     flex-direction: column;
 }
 
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
 .flex-grow-1 {
     flex-grow: 1;
+}
+
+.flex-justify-center {
+    justify-content: center;
 }

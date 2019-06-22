@@ -31,7 +31,7 @@ public class AddressDAO implements DAO<Address>{
                 model.setId(id);
                 model.setCity(rs.getString("city"));
                 model.setCountry(rs.getString("country"));
-                model.setIndex(rs.getString("index"));
+                model.setPostalCode(rs.getString("postal_code"));
                 model.setStreet(rs.getString("street"));
             }
         } catch (Exception e) {

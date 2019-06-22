@@ -2,6 +2,7 @@ package view;
 
 import model.Address;
 import model.Contact;
+import model.ContactFull;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,12 +17,12 @@ public class ContactShort {
     private String address;
     private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
-    public ContactShort(Contact model){
-        this.id = model.getId();
-        this.company = model.getCompany();
-        this.birthDay = formatDate(model.getBirthDay());
+    public ContactShort(ContactFull model){
+        this.id = model.getContact().getId();
+        this.company = model.getContact().getCompany();
+        this.birthDay = formatDate(model.getContact().getBirthDay());
         this.address = prepareAddress(model.getAddress());
-        this.fullName = prepareFullName(model.getName(), model.getSurName(), model.getLastName());
+        this.fullName = prepareFullName(model.getContact().getName(), model.getContact().getSurName(), model.getContact().getLastName());
     }
 
     public int getId() {

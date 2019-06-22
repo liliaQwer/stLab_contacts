@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Contacts List</title>
+    <script type="text/javascript" src="js/modal.js"></script>
     <script type="text/javascript" src="js/mustache.js"></script>
     <script type="text/javascript" src="js/fetch.umd.js"></script>
     <script type="text/javascript" src="js/promise.min.js"></script>
+    <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -60,7 +62,7 @@
             {{/contactsList}}
         </table>
         {{^contactsList}}
-            <div class="warning">There are no contacts</div>
+        <div class="warning">There are no contacts</div>
         {{/contactsList}}
     </div>
     <div class="controls">
@@ -93,11 +95,16 @@
 <script type="template/mustache" id="contactTemplate">
     <h1>Contact Information</h1>
 
-    <form class="marginBottom5">
+    <form class="marginBottom5" id="contactForm">
         <fieldset class="marginBottom5">
             <legend>Basic info</legend>
-            <div class="flex">
-                <div class="flex-grow-1">
+            <div class="flex flex-wrap flex-justify-center">
+                {{#profilePhoto}}
+                <div class="margin5 width200">
+                    <img src={{imgSrc}} id="profilePhoto" class="profilePhoto" alt="Profile picture"/>
+                </div>
+                {{/profilePhoto}}
+                <div class="flex-grow-1 marginRight5">
                     <div class="form-group">
                         <label for="name">Name:</label>
                         <input id="name" type="text" required placeholder="Enter name" value="{{name}}"/>
@@ -115,14 +122,14 @@
 
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
-                        <input id="birthday" type="date" placeholder="Enter birthday" value="{{birthday}}"/>
+                        <input id="birthday" type="uploadDate" placeholder="Enter birthday" value="{{birthday}}"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select id="gender">
                             <option value="" disabled selected>Select gender</option>
                             {{#genderList}}
-                            <option value="{{id}}" {{genderSelected}}>{{name}}</option>
+                            <option value="{{id}}" {{genderSelected}}>{{description}}</option>
                             {{/genderList}}
                         </select>
                     </div>
@@ -133,7 +140,7 @@
                         <select id="marital_status">
                             <option value="" disabled selected>Select marital status</option>
                             {{#maritalStatusList}}
-                            <option value="{{id}}" {{maritalStatusSelected}}>{{name}}</option>
+                            <option value="{{id}}" {{maritalStatusSelected}}>{{description}}</option>
                             {{/maritalStatusList}}
                         </select>
                     </div>
@@ -185,7 +192,7 @@
                 {{/addressInfo}}
             </div>
         </fieldset>
-        <fieldset>
+        <fieldset class="marginBottom5">
             <legend>Contact phones</legend>
             <div class="flex">
                 <div class="flex-grow-1">
@@ -210,9 +217,11 @@
                             </tr>
                             {{#phonesList}}
                             <tr>
-                                <td><input type="checkbox" class="check" value="{{id}}" id="checkFor_{{id}}"></td>
-                                <td><a href="tel:{{phoneNumber}}">{{phoneNumber}}</a></td>
-                                <td>{{phoneType}}</td>
+                                <td><input type="checkbox" class="check phone_check" value="{{id}}"
+                                           id="checkFor_{{id}}"></td>
+                                <td><a href="tel:{{phoneNumber}}">+{{countryCode}}({{operatorCode}}){{phoneNumber}}</a>
+                                </td>
+                                <td>{{phoneTypeText}}</td>
                                 <td>{{comment}}</td>
                             </tr>
                             {{/phonesList}}
@@ -226,15 +235,171 @@
                 {{/phoneInfo}}
             </div>
         </fieldset>
-        <input type="submit" value="Save" />
+        <fieldset class="marginBottom5">
+            <legend>Attachments</legend>
+            <div class="flex">
+                <div class="flex-grow-1">
+                    {{#attachmentsInfo}}
+                    <div class="controls">
+                        <div id="attachmentsButtonsBlock">
+                            <div class="button marginLeft5" id="addAttachment">Add Attachment</div>
+                            {{#hasAttachments}}
+                            <div class="button marginLeft5" id="editAttachment">Edit Attachment</div>
+                            <div class="button marginLeft5" id="removeAttachment">Delete Attachment</div>
+                            {{/hasAttachments}}
+                        </div>
+                    </div>
+                    {{#hasAttachments}}
+                    <div id="attachmentsListBlock">
+                        <table id="attachmentsListTable">
+                            <tr>
+                                <th></th>
+                                <th>File name</th>
+                                <th>Upload date</th>
+                                <th>Comment</th>
+                            </tr>
+                            {{#attachmentsList}}
+                            <tr>
+                                <td><input type="checkbox" class="check attachment_check" value="{{id}}"
+                                           id="checkFor_{{id}}"></td>
+                                <td><a href="#">{{fileName}}</a>
+                                </td>
+                                <td>{{uploadDate}}</td>
+                                <td>{{comment}}</td>
+                            </tr>
+                            {{/attachmentsList}}
+                        </table>
+                    </div>
+                    {{/hasAttachments}}
+                    {{^hasAttachments}}
+                    <div class="warning">There are no attachments added yet</div>
+                    {{/hasAttachments}}
+                </div>
+                {{/attachmentsInfo}}
+            </div>
+        </fieldset>
+        <input type="button" class="button" id="cancelButton" value="Cancel"/>
+        <input type="submit" class="button" value="Save"/>
     </form>
-
-    <input type="button" class="button" id="cancelButton" value="Cancel"/>
+    <div id="editPhoneContainer"></div>
+    <div id="editAttachmentContainer"></div>
+    <div id="editProfilePhotoContainer"></div>
 </script>
+
+<script type="template/mustache" id="editPhoneTemplate">
+    <div id="editPhoneModal" class="modal">
+        <div class="header">
+            <div class="title">{{modalTitle}}</div>
+            <span class="close" data-role="close">X</span>
+        </div>
+        <hr/>
+        <div class="body">
+            <form id="editPhoneForm">
+                <p id="phoneEditorMessageError" class="error hidden"></p>
+                <fieldset class="marginBottom5">
+                    <legend>Phone info</legend>
+                    <div class="form-group">
+                        <label for="countryCode">Country code</label>
+                        <input id="countryCode" min="0" required type="number" value="{{countryCode}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="operatorCode">Operator code</label>
+                        <input id="operatorCode" min="0" required type="number" value="{{operatorCode}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone number</label>
+                        <input id="phoneNumber" min="0" required type="number" value="{{phoneNumber}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneType">Phone type:</label>
+                        <select id="phoneType" required>
+                            <option value="" disabled selected>Select phone type</option>
+                            {{#phoneTypesList}}
+                            <option value="{{id}}" {{phoneTypesSelected}}>{{description}}</option>
+                            {{/phoneTypesList}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <textarea id="comment">{{comment}}</textarea>
+                    </div>
+                </fieldset>
+                <input type="submit" id="submitFormButton" class="hidden"/>
+            </form>
+        </div>
+        <div class="footer">
+            <button type="button" class="button" data-role="close">Close</button>
+            <label for="submitFormButton">Save</label>
+        </div>
+    </div>
+</script>
+
+<script type="template/mustache" id="editAttachmentTemplate">
+    <div id="editAttachmentModal" class="modal">
+        <div class="header">
+            <div class="title">{{modalTitle}}</div>
+            <span class="close" data-role="close">X</span>
+        </div>
+        <hr/>
+        <div class="body">
+            <form id="editAttachmentForm">
+                <p id="attachmentEditorMessageError" class="error hidden"></p>
+                <fieldset class="marginBottom5">
+                    <legend>Attachment info</legend>
+                    <div class="form-group">
+                        <label for="fileName">File name</label>
+                        <input id="fileName" type="text" required value="{{fileName}}">
+                    </div>
+                    <div class="form-group">
+                        <label for="attachComment">Comment</label>
+                        <textarea id="attachComment">{{comment}}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="fileUpload">Upload file</label>
+                        <input id="fileUpload" type="file" {{#isNew}}required{{/isNew}} />
+                    </div>
+                </fieldset>
+                <input type="submit" id="submitAttachmentFormButton" class="hidden"/>
+            </form>
+        </div>
+        <div class="footer">
+            <button type="button" class="button" data-role="close">Close</button>
+            <label for="submitAttachmentFormButton">Save</label>
+        </div>
+    </div>
+</script>
+
+<script type="template/mustache" id="editProfilePhotoTemplate">
+    <div id="editProfilePhotoModal" class="modal">
+        <div class="header">
+            <div class="title">Pick a photo</div>
+            <span class="close" data-role="close">X</span>
+        </div>
+        <hr/>
+        <div class="body">
+            <p id="profilePhotoEditorMessageError" class="error hidden"></p>
+            <fieldset class="marginBottom5">
+                <div class="form-group">
+                    <label for="fileUpload">Upload photo</label>
+                    <input id="photoUpload" accept="image/*" type="file" required/>
+                </div>
+            </fieldset>
+        </div>
+        <div class="footer">
+            <button type="button" class="button" data-role="close">Close</button>
+            <button type="button" class="button" id="submitProfilePhotoFormButton">Save</button>
+        </div>
+    </div>
+</script>
+
 <script type="text/javascript">
     var App = {};
 </script>
 <script type="text/javascript" src="js/constants.js"></script>
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/editAttachmentController.js"></script>
+<script type="text/javascript" src="js/editProfilePhotoController.js"></script>
+<script type="text/javascript" src="js/editPhoneController.js"></script>
 <script type="text/javascript" src="js/editContactController.js"></script>
 <script type="text/javascript" src="js/contactsController.js"></script>
 <script type="text/javascript" src="js/app.js"></script>

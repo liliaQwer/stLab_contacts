@@ -17,6 +17,7 @@
         <com.fasterxml.jackson>2.9.6</com.fasterxml.jackson>
         <org.iTechArt.core>1.0-SNAPSHOT</org.iTechArt.core>
         <maven.plugins.war>3.2.3</maven.plugins.war>
+        <commons-fileupload>1.3.3</commons-fileupload>
     </properties>
 
     <dependencies>
@@ -51,6 +52,14 @@
             <artifactId>core</artifactId>
             <version>${org.iTechArt.core}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

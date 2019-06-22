@@ -11,7 +11,7 @@ import view.LookupsView;
 import javax.sql.DataSource;
 import java.util.List;
 
-public class LookupServiceImpl {
+public class LookupServiceImpl implements LookupService{
     private DataSource dataSource;
 
     public LookupServiceImpl(DataSource dataSource){

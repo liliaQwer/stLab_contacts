@@ -1,8 +1,8 @@
 package model;
 
 public class Address {
-    private int id;
-    private String index;
+    private int id = -1;
+    private String postalCode;
     private String street;
     private String city;
     private String country;
@@ -15,12 +15,12 @@ public class Address {
         this.id = id;
     }
 
-    public String getIndex() {
-        return index;
+    public String getPostalCode() {
+        return postalCode;
     }
 
-    public void setIndex(String index) {
-        this.index = index;
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
     }
 
     public String getStreet() {

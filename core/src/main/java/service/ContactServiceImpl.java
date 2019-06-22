@@ -5,10 +5,12 @@ import dao.ContactDAO;
 import dao.DAO;
 import model.Address;
 import model.Contact;
+import model.ContactFull;
 import utils.ApplicationException;
 import view.ContactsAndPageInfo;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContactServiceImpl implements ContactService{
@@ -21,13 +23,16 @@ public class ContactServiceImpl implements ContactService{
     }
 
     @Override
-    public List<Contact> getPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<ContactFull> getPage(int pageNumber, int pageSize) throws ApplicationException {
         ContactsAndPageInfo pageView = null;
         List<Contact> contactList = contactDAO.getPage(pageNumber, pageSize);
+        List<ContactFull> contactFullList = new ArrayList<>();
         for (Contact contact : contactList) {
-            contact.setAddress((Address)addressDAO.get(contact.getId()));
+            ContactFull contactFull = new ContactFull(contact);
+            contactFull.setAddress((Address)addressDAO.get(contact.getId()));
+            contactFullList.add(contactFull);
         }
-        return contactList;
+        return contactFullList;
     }
 
     @Override

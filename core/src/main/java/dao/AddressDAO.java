@@ -62,10 +62,30 @@ public class AddressDAO implements DAO<Address>{
     }
 
     @Override
-    public int update(Address o) {
-        String getCountQuery = "select count(*) as count from address where contact_id = ?";
-        String insertQuery = "";
-        return 0;
+    public int edit(Address o) throws ApplicationException {
+        String countQuery = "select count(*) from address where contact_id = ?";
+        String updateQuery = "UPDATE address SET country = ?, city = ?, street = ?, postal_code = ? WHERE (contact_id = ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement countSt = connection.prepareStatement(countQuery);
+             PreparedStatement updateSt = connection.prepareStatement(updateQuery)){
+            countSt.setInt(1, o.getContactId());
+            logger.info(countSt.toString());
+            ResultSet countRs = countSt.executeQuery();
+            countRs.next();
+            if (countRs.getInt(1) == 0){
+                return save(o);
+            }
+            updateSt.setInt(5, o.getContactId());
+            updateSt.setString(1, getStringOrNull(o.getCountry()));
+            updateSt.setString(2, getStringOrNull(o.getCity()));
+            updateSt.setString(3, getStringOrNull(o.getStreet()));
+            updateSt.setString(4, getStringOrNull(o.getPostalCode()));
+            logger.info(updateSt.toString());
+            return updateSt.executeUpdate();
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

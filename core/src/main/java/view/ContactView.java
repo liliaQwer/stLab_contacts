@@ -3,8 +3,11 @@ package view;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import model.Address;
 import model.Contact;
+import utils.DateFormatter;
 
 import java.sql.Date;
+import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
 
 public class ContactView{
@@ -12,7 +15,7 @@ public class ContactView{
     private String name;
     private String surname;
     private String patronymic;
-    private Date birthday;
+    private String birthday;
     private String company;
     private String email;
     private String site;
@@ -59,13 +62,6 @@ public class ContactView{
         this.patronymic = patronymic;
     }
 
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
 
     public String getCompany() {
         return company;
@@ -124,8 +120,8 @@ public class ContactView{
     }
 
 
-    public Contact getContact(){
-        return new Contact(id, name, surname, patronymic, birthday, company, site, email, nationality, gender, maritalStatus);
+    public Contact getContact() throws ParseException {
+        return new Contact(id, name, surname, patronymic, DateFormatter.parseDate(birthday), company, site, email, nationality, gender, maritalStatus);
     }
 
     public PhoneDetails getPhoneInfo() {
@@ -142,5 +138,13 @@ public class ContactView{
 
     public void setAttachmentsInfo(AttachmentDetails attachmentsInfo) {
         this.attachmentsInfo = attachmentsInfo;
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
     }
 }

@@ -42,6 +42,7 @@ App.EditContactController = (function (appConstants, utils) {
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("contactTemplate").innerHTML;
         _contactData = {
+            id: -1,
             name: null,
             surname: null,
             patronymic: null,
@@ -121,17 +122,21 @@ App.EditContactController = (function (appConstants, utils) {
                 return response.json();
             })
             .then(function (data) {
-                _contactData = utils.merge({}, _contactData, data.contact, {
-                    addressInfo: data.address,
-                    attachmentsInfo: {
-                        attachmentsList: data.attachmentList || [],
-                        hasAttachments: data.attachmentList && data.attachmentList.length,
+                _contactData = utils.merge({}, _contactData, data, {
+                    phoneInfo: {
+                        phonesList: (data.phoneInfo.phonesList || []).map(function (phoneInfo) {
+                            var phoneType = _lookupsData.phoneTypesList.filter(function (phType) {
+                                return phType.id == phoneInfo.phoneType
+                            })[0];
+                            return utils.merge({}, phoneInfo, {phoneTypeText: phoneType ? phoneType.description : null});
+                        }),
+                        hasPhones: data.phoneInfo.phonesList && data.phoneInfo.phonesList.length,
                         deletedIds: [],
                         updatedIds: []
                     },
-                    phoneInfo: {
-                        phonesList: data.phoneList || [],
-                        hasPhones: data.phoneList && data.phoneList.length,
+                    attachmentsInfo: {
+                        attachmentsList: data.attachmentsInfo.attachmentsList || [],
+                        hasAttachments: data.attachmentsInfo.attachmentsList && data.attachmentsInfo.attachmentsList.length,
                         deletedIds: [],
                         updatedIds: []
                     }
@@ -187,7 +192,7 @@ App.EditContactController = (function (appConstants, utils) {
         }
         _contactData.attachmentsInfo.hasAttachments = attachmentList.length > 0;
         if (data.id > 0 && _contactData.attachmentsInfo.updatedIds.indexOf(data.id) === -1) {
-            _contactData.phoneInfo.updatedIds.push(data.id);
+            _contactData.attachmentsInfo.updatedIds.push(data.id);
         }
         render();
     }
@@ -228,10 +233,11 @@ App.EditContactController = (function (appConstants, utils) {
         });
         _contactData.phoneInfo.phonesList = remainingPhones;
         _contactData.phoneInfo.hasPhones = remainingPhones.length > 0;
-        _contactData.phoneInfo.deletedIds.concat(markedForDeletion);
+        _contactData.phoneInfo.deletedIds = _contactData.phoneInfo.deletedIds.concat(markedForDeletion);
         _contactData.phoneInfo.updatedIds = _contactData.phoneInfo.updatedIds.filter(function (updatedId) {
             return markedForDeletion.indexOf(updatedId) === -1;
         });
+
         render();
     }
 
@@ -244,7 +250,7 @@ App.EditContactController = (function (appConstants, utils) {
         });
         _contactData.attachmentsInfo.attachmentsList = remainingAttachments;
         _contactData.attachmentsInfo.hasAttachments = remainingAttachments.length > 0;
-        _contactData.attachmentsInfo.deletedIds.concat(markedForDeletion);
+        _contactData.attachmentsInfo.deletedIds = _contactData.attachmentsInfo.deletedIds.concat(markedForDeletion);
         _contactData.attachmentsInfo.updatedIds = _contactData.attachmentsInfo.updatedIds.filter(function (updatedId) {
             return markedForDeletion.indexOf(updatedId) === -1;
         });
@@ -403,9 +409,7 @@ App.EditContactController = (function (appConstants, utils) {
         }
 
         _cancelButton.onclick = function () {
-            if (_callbacks.onCancel && typeof _callbacks.onCancel === "function") {
-                _callbacks.onCancel();
-            }
+            cancel();
         }
     }
 
@@ -434,6 +438,7 @@ App.EditContactController = (function (appConstants, utils) {
         var formData = new FormData();
         var attachmentsToSend = {};
         var data = {
+            id: _contactData.id,
             birthday: _contactData.birthday,
             company: _contactData.company,
             email: _contactData.email,
@@ -494,14 +499,25 @@ App.EditContactController = (function (appConstants, utils) {
         }
         formData.append("data", JSON.stringify(data));
         log(data);
-        fetch(appConstants.URL.contact, {
-            method: 'POST',
+        var url = data.id < 0 ? appConstants.URL.contact : appConstants.URL.contact + "/" + data.id;
+        fetch(url, {
+            method: data.id < 0 ? 'POST' : 'PUT',
             body: formData
         })
+            .then(function () {
+                alert("Contact saved");
+                cancel();
+            })
     }
 
     function log(data) {
         console.log(data);
+    }
+
+    function cancel() {
+        if (_callbacks.onCancel && typeof _callbacks.onCancel === "function") {
+            _callbacks.onCancel();
+        }
     }
 
     _callbacks = {

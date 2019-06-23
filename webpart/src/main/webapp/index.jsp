@@ -122,7 +122,7 @@
 
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
-                        <input id="birthday" type="uploadDate" placeholder="Enter birthday" value="{{birthday}}"/>
+                        <input id="birthday" type="date" placeholder="Enter birthday" value="{{birthday}}"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>

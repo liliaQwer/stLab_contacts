@@ -55,7 +55,7 @@ public class AttachmentDAO implements DAO<Attachment> {
                 attachment.setContactId(param);
                 attachment.setFileName(rs.getString("file_name"));
                 attachment.setComment(rs.getString("comment"));
-                attachment.setUploadDate(rs.getDate("upload_date"));
+                attachment.setUploadDate(rs.getDate("upload_date").toLocalDate());
                 attachmentList.add(attachment);
             }
         } catch (Exception e) {
@@ -66,13 +66,22 @@ public class AttachmentDAO implements DAO<Attachment> {
     }
 
     @Override
-    public int update(Attachment o) throws ApplicationException {
+    public int edit(Attachment o) throws ApplicationException {
         return 0;
     }
 
     @Override
     public int delete(int id) throws ApplicationException {
-        return 0;
+        String query = "delete from attachment where id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(query)){
+            st.setInt(1, id);
+            logger.info(st.toString());
+            return st.executeUpdate();
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

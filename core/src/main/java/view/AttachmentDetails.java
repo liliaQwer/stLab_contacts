@@ -1,13 +1,16 @@
 package view;
 
-import model.Attachment;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AttachmentDetails implements Serializable {
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     List<Integer> deletedIds;
-    List<Attachment> attachmentsList;
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    List<AttachmentView> attachmentsList;
 
     public AttachmentDetails() {
     }
@@ -20,11 +23,11 @@ public class AttachmentDetails implements Serializable {
         this.deletedIds = deletedIds;
     }
 
-    public List<Attachment> getAttachmentsList() {
+    public List<AttachmentView> getAttachmentsList() {
         return attachmentsList;
     }
 
-    public void setAttachmentsList(List<Attachment> attachmentsList) {
+    public void setAttachmentsList(List<AttachmentView> attachmentsList) {
         this.attachmentsList = attachmentsList;
     }
 }

@@ -3,10 +3,10 @@ package service;
 import dao.*;
 import model.*;
 import utils.ApplicationException;
-import view.ContactView;
-import view.ContactsAndPageInfo;
+import view.*;
 
 import javax.sql.DataSource;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +27,8 @@ public class ContactServiceImpl implements ContactService{
     public ContactFull get(int id) throws ApplicationException {
         ContactFull contactFull = new ContactFull((Contact) contactDAO.get(id));
         contactFull.setAddress((Address) addressDAO.get(id));
-        contactFull.setAttachmentList(attachmentDAO.getList(id));
-        contactFull.setPhoneList(phoneDAO.getList(id));
+        contactFull.setAttachmentsList(attachmentDAO.getList(id));
+        contactFull.setPhonesList(phoneDAO.getList(id));
         return contactFull;
     }
 
@@ -50,6 +50,30 @@ public class ContactServiceImpl implements ContactService{
     }
 
     @Override
+    public void edit(ContactView o) throws ApplicationException {
+        try {
+            contactDAO.edit(o.getContact());
+            o.getAddressInfo().setContactId(o.getId());
+            addressDAO.edit(o.getAddressInfo());
+            PhoneDetails phoneDetails = o.getPhoneInfo();
+            if (phoneDetails.getDeletedIds() != null){
+                for (Integer id: phoneDetails.getDeletedIds()){
+                    phoneDAO.delete(id);
+                }
+            }
+            AttachmentDetails attachmentDetails= o.getAttachmentsInfo();
+            if (attachmentDetails.getDeletedIds() != null){
+                for (Integer id: attachmentDetails.getDeletedIds()){
+                    attachmentDAO.delete(id);
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new ApplicationException();
+        }
+    }
+
+    @Override
     public void delete(String idListStr) throws ApplicationException {
         String[] idList = idListStr.split(",");
         int result = 0;
@@ -63,7 +87,12 @@ public class ContactServiceImpl implements ContactService{
 
     @Override
     public void save(ContactView o) throws ApplicationException {
-        int contactId = contactDAO.save(o.getContact());
+        int contactId = 0;
+        try {
+            contactId = contactDAO.save(o.getContact());
+        } catch (ParseException e) {
+            throw new ApplicationException("ParseException");
+        }
         if (contactId < 1){
             throw new ApplicationException("Cannot save contact");
         }
@@ -72,8 +101,15 @@ public class ContactServiceImpl implements ContactService{
             addressDAO.save(o.getAddressInfo());
         }
         if (!o.getAttachmentsInfo().getAttachmentsList().isEmpty()){
-            for (Attachment attachment: o.getAttachmentsInfo().getAttachmentsList()){
-                attachment.setContactId(contactId);
+            for (AttachmentView attachmentView: o.getAttachmentsInfo().getAttachmentsList()){
+                attachmentView.setContactId(contactId);
+                Attachment attachment = null;
+                try {
+                    attachment = ViewHelper.prepareAttachment(attachmentView);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    throw new ApplicationException("ParseException");
+                }
                 attachmentDAO.save(attachment);
             }
         }

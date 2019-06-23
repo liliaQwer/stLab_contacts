@@ -62,7 +62,7 @@ public class MaritalStatusDAO implements DAO<IdDescription> {
     }
 
     @Override
-    public int update(IdDescription o) throws ApplicationException {
+    public int edit(IdDescription o) throws ApplicationException {
         return 0;
     }
 

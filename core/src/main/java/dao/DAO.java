@@ -10,7 +10,7 @@ public interface DAO<T> {
     int getCount() throws ApplicationException;
     List<T> getList() throws ApplicationException;
     List<T> getList(int param) throws ApplicationException;
-    int update(T o) throws ApplicationException;
+    int edit(T o) throws ApplicationException;
     int delete(int id) throws ApplicationException;
     int save(T o) throws ApplicationException;
     default String getStringOrNull(String fieldValue){

@@ -1,15 +1,24 @@
-package model;
+package view;
 
-import java.time.LocalDate;
+import model.Attachment;
+import utils.DateFormatter;
 
-public class Attachment {
+public class AttachmentView {
     private int id;
     private int contactId;
     private String fileName;
-    private LocalDate uploadDate;
+    private String uploadDate;
     private String comment;
 
-    public Attachment() {
+    public AttachmentView(Attachment attachment) {
+        this.uploadDate = DateFormatter.formatDate(attachment.getUploadDate());
+        this.id = attachment.getId();
+        this.fileName = attachment.getFileName();
+        this.comment = attachment.getComment();
+        this.contactId = attachment.getContactId();
+    }
+
+    public AttachmentView() {
     }
 
     public int getId() {
@@ -45,11 +54,12 @@ public class Attachment {
         this.comment = comment;
     }
 
-    public LocalDate getUploadDate() {
+
+    public String getUploadDate() {
         return uploadDate;
     }
 
-    public void setUploadDate(LocalDate uploadDate) {
+    public void setUploadDate(String uploadDate) {
         this.uploadDate = uploadDate;
     }
 }

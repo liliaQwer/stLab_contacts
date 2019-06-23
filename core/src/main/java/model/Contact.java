@@ -1,13 +1,14 @@
 package model;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 public class Contact {
     private int id;
     private String name;
     private String surname;
     private String patronymic;
-    private Date birthday;
+    private LocalDate birthday;
     private String company;
     private String site;
     private String email;
@@ -19,7 +20,7 @@ public class Contact {
 
     }
 
-    public Contact(int id, String name, String surname, String patronymic, Date birthday, String company, String site,
+    public Contact(int id, String name, String surname, String patronymic, LocalDate birthday, String company, String site,
                    String email, String nationality, Integer gender, Integer maritalStatus) {
         this.id = id;
         this.name = name;
@@ -67,13 +68,6 @@ public class Contact {
         this.patronymic = patronymic;
     }
 
-    public Date getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(Date birthday) {
-        this.birthday = birthday;
-    }
 
     public String getCompany() {
         return company;
@@ -121,5 +115,13 @@ public class Contact {
 
     public void setMaritalStatus(Integer maritalStatus) {
         this.maritalStatus = maritalStatus;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
     }
 }

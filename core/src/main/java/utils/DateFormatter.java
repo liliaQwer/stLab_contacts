@@ -1,15 +1,20 @@
 package utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class DateFormatter {
-    static SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-    public static String formatDate(Date date){
-        return df.format(date);
-    }
-    public static String formatDate(java.sql.Date date){
-        return df.format(date);
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    public static String formatDate(LocalDate date) {
+        return date.format(formatter);
     }
 
+    public static LocalDate parseDate(String date) throws ParseException {
+        if (date != null && date != "") {
+            return LocalDate.parse(date, formatter);
+        }
+        return null;
+    }
 }

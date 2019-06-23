@@ -21,13 +21,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,9 +30,9 @@ import java.util.List;
 @WebServlet(urlPatterns = {"/contacts/*"})
 public class ContactsServlet extends HttpServlet {
     private static final String UPLOAD_DIRECTORY = "upload";
-    private static final int THRESHOLD_SIZE     = 1024 * 1024 * 3;  // 3MB
-    private static final int MAX_FILE_SIZE      = 1024 * 1024 * 40; // 40MB
-    private static final int MAX_REQUEST_SIZE   = 1024 * 1024 * 50; // 50MB
+    private static final int THRESHOLD_SIZE = 1024 * 1024 * 3;  // 3MB
+    private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
+    private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
@@ -45,11 +40,69 @@ public class ContactsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("pATH: " + request.getPathInfo());
         if (request.getPathInfo() == null) {
             getContactList(request, response);
         } else {
             getContact(request, response);
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (request.getPathInfo() == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        // configures upload settings
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(THRESHOLD_SIZE);
+        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
+
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        upload.setFileSizeMax(MAX_FILE_SIZE);
+        upload.setSizeMax(MAX_REQUEST_SIZE);
+
+        // constructs the directory path to store upload file
+        String uploadPath = getServletContext().getRealPath("")
+                + File.separator + UPLOAD_DIRECTORY;
+        System.out.println(uploadPath);
+        // creates the directory if it does not exist
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdir();
+        }
+
+        ContactView contact = null;
+        try {
+            // parses the request's content to extract file data
+            List formItems = upload.parseRequest(request);
+            Iterator iter = formItems.iterator();
+            // iterates over form's fields
+            while (iter.hasNext()) {
+                Object param = iter.next();
+                System.out.println("param = " + param);
+                FileItem item = (FileItem) param;
+                System.out.println("item.getFieldName() = " + item.getFieldName());
+                // processes only fields that are not form fields
+                if (!item.isFormField()) {
+                    System.out.println("content type = " + item.getContentType() + " item.getFileName=" + item.getName());
+                    String fileName = new File(item.getName()).getName();
+                    System.out.println("fileName =" + fileName);
+                    String filePath = uploadPath + File.separator + fileName;
+                    File storeFile = new File(filePath);
+                    // saves the file on disk
+                    item.write(storeFile);
+                } else {
+                    System.out.println("value=" + item.getString());
+                    ObjectMapper mapper = new ObjectMapper();
+                    contact = mapper.readValue(item.getString(), ContactView.class);
+                }
+            }
+            ContactService service = new ContactServiceImpl(dataSource);
+            service.edit(contact);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            request.setAttribute("message", "There was an error: " + ex.getMessage());
         }
     }
 
@@ -77,7 +130,6 @@ public class ContactsServlet extends HttpServlet {
         String uploadPath = getServletContext().getRealPath("")
                 + File.separator + UPLOAD_DIRECTORY;
         System.out.println(uploadPath);
-
         // creates the directory if it does not exist
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) {
@@ -89,7 +141,6 @@ public class ContactsServlet extends HttpServlet {
             // parses the request's content to extract file data
             List formItems = upload.parseRequest(request);
             Iterator iter = formItems.iterator();
-
             // iterates over form's fields
             while (iter.hasNext()) {
                 Object param = iter.next();
@@ -98,15 +149,14 @@ public class ContactsServlet extends HttpServlet {
                 System.out.println("item.getFieldName() = " + item.getFieldName());
                 // processes only fields that are not form fields
                 if (!item.isFormField()) {
-                    System.out.println("content type = " + item.getContentType() + " item.getFileName="+ item.getName());
+                    System.out.println("content type = " + item.getContentType() + " item.getFileName=" + item.getName());
                     String fileName = new File(item.getName()).getName();
-                    System.out.println("fileName ="+fileName);
+                    System.out.println("fileName =" + fileName);
                     String filePath = uploadPath + File.separator + fileName;
                     File storeFile = new File(filePath);
-
                     // saves the file on disk
                     item.write(storeFile);
-                }else{
+                } else {
                     System.out.println("value=" + item.getString());
                     ObjectMapper mapper = new ObjectMapper();
                     contact = mapper.readValue(item.getString(), ContactView.class);
@@ -149,8 +199,10 @@ public class ContactsServlet extends HttpServlet {
         System.out.println("getContact " + request.getPathInfo());
         try {
             ContactFull contact = service.get(getIdFromPath(request));
-            sendJsonResponse(response, contact);
+            ContactView view = ViewHelper.prepareContactView(contact);
+            sendJsonResponse(response, view);
         } catch (ApplicationException e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
         }
@@ -184,6 +236,7 @@ public class ContactsServlet extends HttpServlet {
             System.out.println(mapper.writeValueAsString(view));
             out.flush();
         } catch (IOException e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -218,13 +271,6 @@ public class ContactsServlet extends HttpServlet {
     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/contacts_karavaichyk?serverTimezone=EST5EDT",
                     "root", "qwer");
             System.out.println("getSchema" + connection.getSchema());
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery("select * from contact");
-            System.out.println("in result");
-            rs.next();
-            System.out.println(rs.getString("name"));
-            st.close();
-            connection.close();*/
 
             /*MysqlDataSource dataSource = new MysqlDataSource();
             dataSource.setUser("root");
@@ -232,13 +278,7 @@ public class ContactsServlet extends HttpServlet {
             dataSource.setURL("jdbc:mysql://localhost:3306/contacts_karavaichyk?serverTimezone=EST5EDT");
             Connection connection = dataSource.getConnection();
             System.out.println("dataSource");
-            Statement st = connection.createStatement();
-            ResultSet rs = st.executeQuery("select * from contact");
-            System.out.println("in result");
-            rs.next();
-            System.out.println(rs.getString("name"));
-            st.close();
-            connection.close();
+
         */
 
 

@@ -7,6 +7,7 @@ import utils.ContactStatus;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ContactDAO implements DAO<Contact>{
             contact.setName(rs.getString("name"));
             contact.setSurname(rs.getString("surname"));
             contact.setPatronymic(rs.getString("patronymic"));
-            contact.setBirthday(rs.getDate("birthday"));
+            contact.setBirthday(rs.getObject("birthday", LocalDate.class));
             contact.setCompany(rs.getString("company"));
             contact.setSite(rs.getString("site"));
             contact.setEmail(rs.getString("email"));
@@ -67,7 +68,7 @@ public class ContactDAO implements DAO<Contact>{
                 contact.setName(rs.getString("name"));
                 contact.setSurname(rs.getString("surname"));
                 contact.setPatronymic(rs.getString("patronymic"));
-                contact.setBirthday(rs.getDate("birthday"));
+                contact.setBirthday(rs.getObject("birthday", LocalDate.class));
                 contact.setCompany(rs.getString("company"));
                 contactList.add(contact);
             }
@@ -105,8 +106,30 @@ public class ContactDAO implements DAO<Contact>{
     }
 
     @Override
-    public int update(Contact o) throws ApplicationException {
-        return 0;
+    public int edit(Contact o) throws ApplicationException {
+        String updateQuery = "UPDATE contact SET name = ?, patronymic = ?, surname = ?, birthday = ?, company = ?, " +
+                "nationality = ?, marital_status_id = ?, site = ?, email = ?, gender_id = ? WHERE (id = ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement insertSt = connection.prepareStatement(updateQuery)
+        ){
+            insertSt.setString(1, o.getName());
+            insertSt.setString(2, getStringOrNull(o.getPatronymic()));
+            insertSt.setString(3, o.getSurname());
+            insertSt.setObject(4, o.getBirthday(), Types.DATE);
+            insertSt.setString(5, getStringOrNull(o.getCompany()));
+            insertSt.setString(6, getStringOrNull(o.getNationality()));
+            insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
+            insertSt.setObject(8, getStringOrNull(o.getSite()));
+            insertSt.setString(9, getStringOrNull(o.getEmail()));
+            insertSt.setObject(10, o.getGender(), Types.INTEGER);
+            insertSt.setInt(11, o.getId());
+            logger.info(insertSt.toString());
+            return insertSt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override
@@ -130,7 +153,7 @@ public class ContactDAO implements DAO<Contact>{
     @Override
     public int save(Contact o) throws ApplicationException {
         String insertQuery = "insert into contact(name, patronymic, surname, birthday, company, nationality, marital_status_id," +
-                " email, gender_id, active_status) values(?,?,?,?,?,?,?,?,?,?)";
+                " email, gender_id, site, active_status) values(?,?,?,?,?,?,?,?,?,?,?)";
         String lastIdQuery = "SELECT last_insert_id()";
         int result;
         try (Connection connection = dataSource.getConnection();
@@ -140,13 +163,14 @@ public class ContactDAO implements DAO<Contact>{
             insertSt.setString(1, o.getName());
             insertSt.setString(2, getStringOrNull(o.getPatronymic()));
             insertSt.setString(3, o.getSurname());
-            insertSt.setDate(4, o.getBirthday());
+            insertSt.setObject(4, o.getBirthday(), Types.DATE);
             insertSt.setString(5, getStringOrNull(o.getCompany()));
             insertSt.setString(6, getStringOrNull(o.getNationality()));
             insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
             insertSt.setString(8, getStringOrNull(o.getEmail()));
             insertSt.setObject(9, o.getGender(), Types.INTEGER);
-            insertSt.setString(10, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
+            insertSt.setObject(10, getStringOrNull(o.getSite()));
+            insertSt.setString(11, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
             logger.info(insertSt.toString());
             result = insertSt.executeUpdate();
             if (result == 1){

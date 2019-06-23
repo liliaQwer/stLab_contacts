@@ -5,6 +5,7 @@ import model.ContactFull;
 import utils.DateFormatter;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,8 +20,8 @@ public class ContactShort {
     public ContactShort(ContactFull model){
         this.id = model.getContact().getId();
         this.company = model.getContact().getCompany();
-        Date birthday = model.getContact().getBirthday();
-        this.birthday = birthday != null ? DateFormatter.formatDate(model.getContact().getBirthday()) : null;
+        LocalDate birthday = model.getContact().getBirthday();
+        this.birthday = birthday != null ? DateFormatter.formatDate(birthday) : null;
         this.address = prepareAddress(model.getAddress());
         this.fullName = prepareFullName(model.getContact().getName(), model.getContact().getSurname(), model.getContact().getPatronymic());
     }

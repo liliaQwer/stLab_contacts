@@ -69,13 +69,22 @@ public class PhoneDAO implements DAO<Phone> {
     }
 
     @Override
-    public int update(Phone o) throws ApplicationException {
+    public int edit(Phone o) throws ApplicationException {
         return 0;
     }
 
     @Override
     public int delete(int id) throws ApplicationException {
-        return 0;
+        String query = "delete from phone where id =?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(query)){
+            st.setInt(1, id);
+            logger.info(st.toString());
+            return st.executeUpdate();
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

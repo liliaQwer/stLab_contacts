@@ -6,8 +6,8 @@ public class ContactFull {
     private Contact contact;
     private Address address;
     private Photo photo;
-    private List<Attachment> attachmentList;
-    private List<Phone> phoneList;
+    private List<Attachment> attachmentsList;
+    private List<Phone> phonesList;
 
     public ContactFull() {
     }
@@ -40,19 +40,19 @@ public class ContactFull {
         this.photo = photo;
     }
 
-    public List<Attachment> getAttachmentList() {
-        return attachmentList;
+    public List<Attachment> getAttachmentsList() {
+        return attachmentsList;
     }
 
-    public void setAttachmentList(List<Attachment> attachmentList) {
-        this.attachmentList = attachmentList;
+    public void setAttachmentsList(List<Attachment> attachmentsList) {
+        this.attachmentsList = attachmentsList;
     }
 
-    public List<Phone> getPhoneList() {
-        return phoneList;
+    public List<Phone> getPhonesList() {
+        return phonesList;
     }
 
-    public void setPhoneList(List<Phone> phoneList) {
-        this.phoneList = phoneList;
+    public void setPhonesList(List<Phone> phonesList) {
+        this.phonesList = phonesList;
     }
 }

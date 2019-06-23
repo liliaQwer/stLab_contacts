@@ -2,6 +2,7 @@ package model;
 
 public class Phone {
     private int id;
+    private int contactId;
     private Integer countryCode;
     private Integer operatorCode;
     private Integer phoneNumber;
@@ -57,5 +58,13 @@ public class Phone {
 
     public void setPhoneType(Integer phoneType) {
         this.phoneType = phoneType;
+    }
+
+    public int getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(int contactId) {
+        this.contactId = contactId;
     }
 }

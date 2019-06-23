@@ -1,8 +1,8 @@
 package view;
 
 import model.Address;
-import model.Contact;
 import model.ContactFull;
+import utils.DateFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,17 +12,17 @@ import java.util.stream.Stream;
 public class ContactShort {
     private int id;
     private String fullName;
-    private String birthDay;
+    private String birthday;
     private String company;
     private String address;
-    private SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
     public ContactShort(ContactFull model){
         this.id = model.getContact().getId();
         this.company = model.getContact().getCompany();
-        this.birthDay = formatDate(model.getContact().getBirthDay());
+        Date birthday = model.getContact().getBirthday();
+        this.birthday = birthday != null ? DateFormatter.formatDate(model.getContact().getBirthday()) : null;
         this.address = prepareAddress(model.getAddress());
-        this.fullName = prepareFullName(model.getContact().getName(), model.getContact().getSurName(), model.getContact().getLastName());
+        this.fullName = prepareFullName(model.getContact().getName(), model.getContact().getSurname(), model.getContact().getPatronymic());
     }
 
     public int getId() {
@@ -33,8 +33,8 @@ public class ContactShort {
         return fullName;
     }
 
-    public String getBirthDay() {
-        return birthDay;
+    public String getBirthday() {
+        return birthday;
     }
 
     public String getCompany() {
@@ -57,9 +57,5 @@ public class ContactShort {
                 .filter(s -> s != null)
                 .collect(Collectors.joining(", "));
         return addressLine;
-    }
-
-    private String formatDate(Date date){
-        return df.format(date);
     }
 }

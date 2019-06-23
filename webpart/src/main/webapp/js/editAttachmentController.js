@@ -5,7 +5,6 @@ App.EditAttachmentController = (function (appConstants, utils) {
         _modal,
         _attachmentData,
         _form,
-        _fileNameElement,
         _fileUploadElement,
         _commentElement,
         _uploadedFile,
@@ -48,7 +47,6 @@ App.EditAttachmentController = (function (appConstants, utils) {
 
     function assignEvents() {
         _form = document.getElementById('editAttachmentForm');
-        _fileNameElement = document.getElementById('fileName');
         _commentElement = document.getElementById('attachComment');
         _fileUploadElement = document.getElementById('fileUpload');
 
@@ -63,16 +61,16 @@ App.EditAttachmentController = (function (appConstants, utils) {
             var date = today.getDate();
             var year = today.getFullYear();
             var month = today.getMonth() + 1;
-            month = month.length === 1 ? '0' + month : month;
+            month = (month < 10)  ? '0' + month : month;
             var formattedDate = year + "-" + month + "-" + date;
             var attachmentData = utils.merge({}, _attachmentData, {
-                fileName: _fileNameElement.value,
                 uploadDate: formattedDate,
                 comment: _commentElement.value
             });
 
             if (_uploadedFile) {
-                attachmentData.uploadedFile = _uploadedFile
+                attachmentData.uploadedFile = _uploadedFile;
+                attachmentData.fileName = _uploadedFile.name;
             }
 
             if (_callbacks.onSaveAttachment && typeof _callbacks.onSaveAttachment === "function") {

@@ -1,8 +1,10 @@
 package servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import model.Attachment;
 import model.Contact;
+import model.ContactFull;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -81,8 +83,8 @@ public class ContactsServlet extends HttpServlet {
         if (!uploadDir.exists()) {
             uploadDir.mkdir();
         }
-        Contact contact = null;
-        List<Attachment> attachmentList = new ArrayList<>();
+
+        ContactView contact = null;
         try {
             // parses the request's content to extract file data
             List formItems = upload.parseRequest(request);
@@ -91,9 +93,9 @@ public class ContactsServlet extends HttpServlet {
             // iterates over form's fields
             while (iter.hasNext()) {
                 Object param = iter.next();
-                System.out.println(param);
+                System.out.println("param = " + param);
                 FileItem item = (FileItem) param;
-                System.out.println(item.getFieldName());
+                System.out.println("item.getFieldName() = " + item.getFieldName());
                 // processes only fields that are not form fields
                 if (!item.isFormField()) {
                     System.out.println("content type = " + item.getContentType() + " item.getFileName="+ item.getName());
@@ -106,14 +108,15 @@ public class ContactsServlet extends HttpServlet {
                     item.write(storeFile);
                 }else{
                     System.out.println("value=" + item.getString());
-                    contact = new Contact();
                     ObjectMapper mapper = new ObjectMapper();
-                    System.out.println("COntactView = " + mapper.readValue(item.getString(), ContactView.class));
+                    contact = mapper.readValue(item.getString(), ContactView.class);
 
                 }
             }
-            request.setAttribute("message", "Upload has been done successfully!");
+            ContactService service = new ContactServiceImpl(dataSource);
+            service.save(contact);
         } catch (Exception ex) {
+            ex.printStackTrace();
             request.setAttribute("message", "There was an error: " + ex.getMessage());
         }
     }
@@ -142,7 +145,15 @@ public class ContactsServlet extends HttpServlet {
     }
 
     private void getContact(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
+        ContactServiceImpl service = new ContactServiceImpl(dataSource);
+        System.out.println("getContact " + request.getPathInfo());
+        try {
+            ContactFull contact = service.get(getIdFromPath(request));
+            sendJsonResponse(response, contact);
+        } catch (ApplicationException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(response, e);
+        }
     }
 
     @Override
@@ -155,7 +166,6 @@ public class ContactsServlet extends HttpServlet {
         System.out.println("doDelete");
         try {
             service.delete(getIdStrFromPath(request));
-            response.setStatus(HttpServletResponse.SC_OK);
         } catch (ApplicationException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);

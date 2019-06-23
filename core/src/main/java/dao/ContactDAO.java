@@ -1,6 +1,5 @@
 package dao;
 
-import model.Address;
 import model.Contact;
 import org.apache.logging.log4j.LogManager;
 import utils.ApplicationException;
@@ -23,12 +22,37 @@ public class ContactDAO implements DAO<Contact>{
 
     @Override
     public Contact get(int id) throws ApplicationException {
-        return null;
+        String query = "select * from contact where id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(query)){
+            st.setInt(1, id);
+            logger.info(st.toString());
+            ResultSet rs = st.executeQuery();
+            if (!rs.next()) {
+                throw new ApplicationException();
+            }
+            Contact contact = new Contact();
+            contact.setId(rs.getInt("id"));
+            contact.setName(rs.getString("name"));
+            contact.setSurname(rs.getString("surname"));
+            contact.setPatronymic(rs.getString("patronymic"));
+            contact.setBirthday(rs.getDate("birthday"));
+            contact.setCompany(rs.getString("company"));
+            contact.setSite(rs.getString("site"));
+            contact.setEmail(rs.getString("email"));
+            contact.setGender(rs.getInt("gender_id"));
+            contact.setMaritalStatus(rs.getInt("marital_status_id"));
+            contact.setNationality(rs.getString("nationality"));
+            return contact;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override
     public List<Contact> getPage(int pageNumber, int pageSize) throws ApplicationException {
-        List<Contact> modelList = new ArrayList<>();
+        List<Contact> contactList = new ArrayList<>();
         String query = "select * from contact where active_status = ? limit ?,?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement st = connection.prepareStatement(query)){
@@ -38,20 +62,20 @@ public class ContactDAO implements DAO<Contact>{
             logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
-                Contact model = new Contact();
-                model.setId(rs.getInt("id"));
-                model.setName(rs.getString("name"));
-                model.setSurName(rs.getString("surname"));
-                model.setLastName(rs.getString("patronymic"));
-                model.setBirthDay(rs.getDate("birthday"));
-                model.setCompany(rs.getString("company"));
-                modelList.add(model);
+                Contact contact = new Contact();
+                contact.setId(rs.getInt("id"));
+                contact.setName(rs.getString("name"));
+                contact.setSurname(rs.getString("surname"));
+                contact.setPatronymic(rs.getString("patronymic"));
+                contact.setBirthday(rs.getDate("birthday"));
+                contact.setCompany(rs.getString("company"));
+                contactList.add(contact);
             }
         } catch (Exception e) {
             logger.error(e);
             throw new ApplicationException();
         }
-        return modelList == null ? Collections.emptyList() : modelList;
+        return contactList == null ? Collections.emptyList() : contactList;
     }
 
     @Override
@@ -72,6 +96,11 @@ public class ContactDAO implements DAO<Contact>{
 
     @Override
     public List<Contact> getList() throws ApplicationException {
+        return null;
+    }
+
+    @Override
+    public List<Contact> getList(int param) throws ApplicationException {
         return null;
     }
 
@@ -100,7 +129,39 @@ public class ContactDAO implements DAO<Contact>{
 
     @Override
     public int save(Contact o) throws ApplicationException {
-        return 0;
+        String insertQuery = "insert into contact(name, patronymic, surname, birthday, company, nationality, marital_status_id," +
+                " email, gender_id, active_status) values(?,?,?,?,?,?,?,?,?,?)";
+        String lastIdQuery = "SELECT last_insert_id()";
+        int result;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement insertSt = connection.prepareStatement(insertQuery);
+             PreparedStatement lastIdSt = connection.prepareStatement(lastIdQuery)
+             ){
+            insertSt.setString(1, o.getName());
+            insertSt.setString(2, getStringOrNull(o.getPatronymic()));
+            insertSt.setString(3, o.getSurname());
+            insertSt.setDate(4, o.getBirthday());
+            insertSt.setString(5, getStringOrNull(o.getCompany()));
+            insertSt.setString(6, getStringOrNull(o.getNationality()));
+            insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
+            insertSt.setString(8, getStringOrNull(o.getEmail()));
+            insertSt.setObject(9, o.getGender(), Types.INTEGER);
+            insertSt.setString(10, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
+            logger.info(insertSt.toString());
+            result = insertSt.executeUpdate();
+            if (result == 1){
+                ResultSet rs = lastIdSt.executeQuery();
+                if (rs.next()){
+                    result = rs.getInt(1);
+                }
+            }
+            System.out.println("result " + result);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
 }

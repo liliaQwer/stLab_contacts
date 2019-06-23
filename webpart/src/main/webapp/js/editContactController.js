@@ -116,11 +116,29 @@ App.EditContactController = (function (appConstants, utils) {
     }
 
     function loadContactInfo(contactId) {
-        return fetch(appConstants.URL.contactInfo + "?" + contactId)
+        return fetch(appConstants.URL.contact + "/" + contactId)
             .then(function (response) {
-                _contactData = response.json();
-                return _contactData;
+                return response.json();
             })
+            .then(function (data) {
+                _contactData = utils.merge({}, _contactData, data.contact, {
+                    addressInfo: data.address,
+                    attachmentsInfo: {
+                        attachmentsList: data.attachmentList || [],
+                        hasAttachments: data.attachmentList && data.attachmentList.length,
+                        deletedIds: [],
+                        updatedIds: []
+                    },
+                    phoneInfo: {
+                        phonesList: data.phoneList || [],
+                        hasPhones: data.phoneList && data.phoneList.length,
+                        deletedIds: [],
+                        updatedIds: []
+                    }
+                });
+                return _contactData;
+            });
+
     }
 
     function updatePhone(data) {
@@ -463,7 +481,6 @@ App.EditContactController = (function (appConstants, utils) {
                         id: attachment.id,
                         comment: attachment.comment,
                         fileName: attachment.fileName,
-                        uploadDate: attachment.uploadDate
                     }
                 })
             }

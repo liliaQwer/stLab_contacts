@@ -20,7 +20,7 @@ public class AddressDAO implements DAO<Address>{
 
     @Override
     public Address get(int id) throws ApplicationException {
-        Address model = new Address();
+        Address address = new Address();
         String query = "select * from address where contact_id = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement st = connection.prepareStatement(query)){
@@ -28,17 +28,17 @@ public class AddressDAO implements DAO<Address>{
             logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             if (rs.next()){
-                model.setId(id);
-                model.setCity(rs.getString("city"));
-                model.setCountry(rs.getString("country"));
-                model.setPostalCode(rs.getString("postal_code"));
-                model.setStreet(rs.getString("street"));
+                address.setContactId(id);
+                address.setCity(rs.getString("city"));
+                address.setCountry(rs.getString("country"));
+                address.setPostalCode(rs.getString("postal_code"));
+                address.setStreet(rs.getString("street"));
             }
         } catch (Exception e) {
             logger.error(e);
             throw new ApplicationException();
         }
-        return model;
+        return address;
     }
 
     @Override
@@ -57,7 +57,14 @@ public class AddressDAO implements DAO<Address>{
     }
 
     @Override
+    public List<Address> getList(int param) throws ApplicationException {
+        return null;
+    }
+
+    @Override
     public int update(Address o) {
+        String getCountQuery = "select count(*) as count from address where contact_id = ?";
+        String insertQuery = "";
         return 0;
     }
 
@@ -67,7 +74,22 @@ public class AddressDAO implements DAO<Address>{
     }
 
     @Override
-    public int save(Address o) {
-        return 0;
+    public int save(Address o) throws ApplicationException{
+        int result;
+        String insertQuery = "INSERT INTO address (contact_id, country, city, street, postal_code) VALUES (?, ?, ?, ?, ?)";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(insertQuery)){
+            st.setInt(1, o.getContactId());
+            st.setString(2, getStringOrNull(o.getCountry()));
+            st.setString(3, getStringOrNull(o.getCity()));
+            st.setString(4, getStringOrNull(o.getStreet()));
+            st.setString(5, getStringOrNull(o.getPostalCode()));
+            logger.info(st.toString());
+            result = st.executeUpdate();
+            return result;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 }

@@ -1,15 +1,18 @@
 package view;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import model.Address;
+import model.Contact;
 
+import java.sql.Date;
 import java.util.List;
 
-public class ContactView {
+public class ContactView{
     private int id;
     private String name;
     private String surname;
     private String patronymic;
-    private String birthDay;
+    private Date birthday;
     private String company;
     private String email;
     private String site;
@@ -17,8 +20,8 @@ public class ContactView {
     private Integer maritalStatus;
     private String nationality;
     private Address addressInfo;
-    private List<PhoneDetails> phoneInfo;
-    private List<AttachmentDetails> attachmentInfo;
+    private PhoneDetails phoneInfo;
+    private AttachmentDetails attachmentsInfo;
 
     public ContactView() {
 
@@ -56,12 +59,12 @@ public class ContactView {
         this.patronymic = patronymic;
     }
 
-    public String getBirthDay() {
-        return birthDay;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setBirthDay(String birthDay) {
-        this.birthDay = birthDay;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getCompany() {
@@ -120,19 +123,24 @@ public class ContactView {
         this.addressInfo = addressInfo;
     }
 
-    public List<PhoneDetails> getPhoneInfo() {
+
+    public Contact getContact(){
+        return new Contact(id, name, surname, patronymic, birthday, company, site, email, nationality, gender, maritalStatus);
+    }
+
+    public PhoneDetails getPhoneInfo() {
         return phoneInfo;
     }
 
-    public void setPhoneInfo(List<PhoneDetails> phoneInfo) {
+    public void setPhoneInfo(PhoneDetails phoneInfo) {
         this.phoneInfo = phoneInfo;
     }
 
-    public List<AttachmentDetails> getAttachmentInfo() {
-        return attachmentInfo;
+    public AttachmentDetails getAttachmentsInfo() {
+        return attachmentsInfo;
     }
 
-    public void setAttachmentInfo(List<AttachmentDetails> attachmentInfo) {
-        this.attachmentInfo = attachmentInfo;
+    public void setAttachmentsInfo(AttachmentDetails attachmentsInfo) {
+        this.attachmentsInfo = attachmentsInfo;
     }
 }

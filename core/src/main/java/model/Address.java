@@ -1,18 +1,27 @@
 package model;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class Address {
-    private int id = -1;
+    private int contactId = -1;
     private String postalCode;
     private String street;
     private String city;
     private String country;
 
-    public int getId() {
-        return id;
+    public boolean isEmpty() {
+        return Stream.of(postalCode, street, city, country)
+                .filter(s -> s != null)
+                .collect(Collectors.joining("")).isEmpty();
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getContactId() {
+        return contactId;
+    }
+
+    public void setContactId(int contactId) {
+        this.contactId = contactId;
     }
 
     public String getPostalCode() {

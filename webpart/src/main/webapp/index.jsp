@@ -46,12 +46,12 @@
             <tr>
                 <td><input type="checkbox" class="check" value="{{id}}" id="checkFor_{{id}}"></td>
                 <td><a href="#">{{fullName}}</a></td>
-                <td align="right">{{birthDay}}</td>
+                <td align="right">{{birthday}}</td>
                 <td>{{address}}</td>
                 <td>{{company}}</td>
                 <td></td>
                 <td align="center">
-                        <span>
+                        <span class="link editContact" data-id="{{id}}">
                             <img src="img/edit.png" alt="Edit contact" class="editImage">
                         </span>
                     <span class="link deleteContact" data-id="{{id}}">
@@ -347,16 +347,12 @@
                 <fieldset class="marginBottom5">
                     <legend>Attachment info</legend>
                     <div class="form-group">
-                        <label for="fileName">File name</label>
-                        <input id="fileName" type="text" required value="{{fileName}}">
+                        <label for="fileUpload">Upload file</label>
+                        <input id="fileUpload" type="file" {{#isNew}}required{{/isNew}} />
                     </div>
                     <div class="form-group">
                         <label for="attachComment">Comment</label>
                         <textarea id="attachComment">{{comment}}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="fileUpload">Upload file</label>
-                        <input id="fileUpload" type="file" {{#isNew}}required{{/isNew}} />
                     </div>
                 </fieldset>
                 <input type="submit" id="submitAttachmentFormButton" class="hidden"/>

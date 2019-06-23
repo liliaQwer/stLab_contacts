@@ -1,8 +1,8 @@
 (function (appConstants, contactsController, editContactController, editPhoneController, editAttachmentController, editProfilePhotoController) {
     window.onload = function () {
-        editContactController.init();
-        contactsController.callbacks.onAddContact = function () {
-            editContactController.init();
+        contactsController.init();
+        contactsController.callbacks.onAddContact = function (contactId) {
+            editContactController.init(contactId);
         };
         editContactController.callbacks.onCancel = function () {
             contactsController.init();

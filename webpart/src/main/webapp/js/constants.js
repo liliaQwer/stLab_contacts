@@ -17,7 +17,6 @@ App.Constants = {
     },
     URL: {
         contact: "contacts",
-        lookups: "lookups",
-        contactInfo: "contactInfo",
+        lookups: "lookups"
     }
 };

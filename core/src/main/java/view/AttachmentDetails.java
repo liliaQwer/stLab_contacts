@@ -2,11 +2,12 @@ package view;
 
 import model.Attachment;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class AttachmentDetails {
+public class AttachmentDetails implements Serializable {
     List<Integer> deletedIds;
-    List<Attachment> attachmentList;
+    List<Attachment> attachmentsList;
 
     public AttachmentDetails() {
     }
@@ -19,11 +20,11 @@ public class AttachmentDetails {
         this.deletedIds = deletedIds;
     }
 
-    public List<Attachment> getAttachmentList() {
-        return attachmentList;
+    public List<Attachment> getAttachmentsList() {
+        return attachmentsList;
     }
 
-    public void setAttachmentList(List<Attachment> attachmentList) {
-        this.attachmentList = attachmentList;
+    public void setAttachmentsList(List<Attachment> attachmentsList) {
+        this.attachmentsList = attachmentsList;
     }
 }

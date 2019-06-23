@@ -1,18 +1,39 @@
 package model;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class Contact {
     private int id;
     private String name;
-    private String surName;
-    private String lastName;
-    private Date birthDay;
+    private String surname;
+    private String patronymic;
+    private Date birthday;
     private String company;
+    private String site;
+    private String email;
+    private String nationality;
+    private Integer gender;
+    private Integer maritalStatus;
 
     public Contact() {
 
     }
+
+    public Contact(int id, String name, String surname, String patronymic, Date birthday, String company, String site,
+                   String email, String nationality, Integer gender, Integer maritalStatus) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.patronymic = patronymic;
+        this.birthday = birthday;
+        this.company = company;
+        this.site = site;
+        this.email = email;
+        this.nationality = nationality;
+        this.gender = gender;
+        this.maritalStatus = maritalStatus;
+    }
+
 
     public int getId() {
         return id;
@@ -30,28 +51,28 @@ public class Contact {
         this.name = name;
     }
 
-    public String getSurName() {
-        return (surName == null) ? "" : surName;
+    public String getSurname() {
+        return (surname == null) ? "" : surname;
     }
 
-    public void setSurName(String surName) {
-        this.surName = surName;
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
-    public String getLastName() {
-        return (lastName == null) ? "" : lastName;
+    public String getPatronymic() {
+        return (patronymic == null) ? "" : patronymic;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
     }
 
-    public Date getBirthDay() {
-        return birthDay;
+    public Date getBirthday() {
+        return birthday;
     }
 
-    public void setBirthDay(Date birthDay) {
-        this.birthDay = birthDay;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public String getCompany() {
@@ -60,5 +81,45 @@ public class Contact {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public String getSite() {
+        return site;
+    }
+
+    public void setSite(String site) {
+        this.site = site;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public Integer getGender() {
+        return gender;
+    }
+
+    public void setGender(Integer gender) {
+        this.gender = gender;
+    }
+
+    public Integer getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(Integer maritalStatus) {
+        this.maritalStatus = maritalStatus;
     }
 }

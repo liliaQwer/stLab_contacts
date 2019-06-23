@@ -15,6 +15,7 @@ App.ContactsController = (function (appConstants) {
         _goFirstPageButton,
         _goLastPageButton,
         _deleteContactButtons,
+        _editContactButtons,
         _deleteContactsButton,
         _addContactButton,
         _sendEmailButton,
@@ -117,6 +118,7 @@ App.ContactsController = (function (appConstants) {
         _goFirstPageButton = document.getElementById("goFirstPage");
         _goPrevPageButton = document.getElementById("goPrevPage");
         _deleteContactButtons = document.getElementsByClassName("deleteContact");
+        _editContactButtons = document.getElementsByClassName("editContact");
         _deleteContactsButton = document.getElementById("deleteContacts");
         _sendEmailButton = document.getElementById("sendEmail");
         _addContactButton = document.getElementById("addContact");
@@ -130,6 +132,17 @@ App.ContactsController = (function (appConstants) {
                     return;
                 }
                 deleteContact(id);
+            }
+        }
+
+        for (var i = 0; i < _editContactButtons.length; i++) {
+            var editContact = _editContactButtons[i];
+            editContact.onclick = function (e) {
+                var id = e.currentTarget.dataset.id;
+                log(id);
+                if (_callbacks.onAddContact && typeof _callbacks.onAddContact == 'function') {
+                    _callbacks.onAddContact(id);
+                }
             }
         }
 
@@ -151,6 +164,8 @@ App.ContactsController = (function (appConstants) {
             log(idList.join(","));
             deleteContact(idList.join(","));
         }
+
+
 
         _addContactButton.onclick = function () {
             if (_callbacks.onAddContact && typeof _callbacks.onAddContact == 'function') {

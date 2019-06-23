@@ -1,10 +1,12 @@
 package model;
 
+import java.sql.Date;
+
 public class Attachment {
     private int id;
     private int contactId;
     private String fileName;
-    private String uploadDate;
+    private Date uploadDate;
     private String comment;
 
     public Attachment() {
@@ -34,13 +36,6 @@ public class Attachment {
         this.fileName = fileName;
     }
 
-    public String getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(String uploadDate) {
-        this.uploadDate = uploadDate;
-    }
 
     public String getComment() {
         return comment;
@@ -48,5 +43,13 @@ public class Attachment {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public Date getUploadDate() {
+        return uploadDate;
+    }
+
+    public void setUploadDate(Date uploadDate) {
+        this.uploadDate = uploadDate;
     }
 }

@@ -57,6 +57,11 @@ public class PhonesTypeDAO implements DAO<IdDescription> {
     }
 
     @Override
+    public List<IdDescription> getList(int param) throws ApplicationException {
+        return null;
+    }
+
+    @Override
     public int update(IdDescription o) throws ApplicationException {
         return 0;
     }

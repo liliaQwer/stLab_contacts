@@ -108,7 +108,12 @@ th {
     height: 15px;
 }
 
-.link {
+.cursor-pointer {
+    cursor: pointer;
+}
+.link{
+    text-decoration: underline;
+    color: darkslateblue;
     cursor: pointer;
 }
 

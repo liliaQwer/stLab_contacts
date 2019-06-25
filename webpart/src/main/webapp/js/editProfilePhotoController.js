@@ -48,6 +48,7 @@ App.EditProfilePhotoController = (function (appConstants) {
                 return;
             }
             _profilePhotoData.uploadedFile = f;
+            _profilePhotoData.fileName = f.name;
         }
 
         _saveButton.onclick = function () {

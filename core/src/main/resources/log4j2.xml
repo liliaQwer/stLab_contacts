@@ -1,7 +1,7 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
         </Console>
         <!--<RollingFile fileName="LogToRollingFile" fileName="${sys:catalina.home}/logs/contacts_karavaichyk.log"
                      filePattern="logs/$${uploadDate:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">

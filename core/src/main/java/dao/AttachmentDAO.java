@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +68,20 @@ public class AttachmentDAO implements DAO<Attachment> {
 
     @Override
     public int edit(Attachment o) throws ApplicationException {
-        return 0;
+        String updateQuery = "UPDATE attachment set file_name = ?, comment = ?, upload_date = ? where id = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(updateQuery)){
+            st.setString(1, o.getFileName());
+            st.setString(2, getStringOrNull(o.getComment()));
+            System.out.println("upload in edit DAO " + o.getUploadDate());
+            st.setObject(3, o.getUploadDate(), Types.DATE);
+            st.setInt(4, o.getId());
+            logger.info(st.toString());
+            return st.executeUpdate();
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

@@ -45,6 +45,7 @@ public class ViewHelper {
         contactView.setNationality(contactFull.getContact().getNationality());
         contactView.setPatronymic(contactFull.getContact().getPatronymic());
         contactView.setSite(contactFull.getContact().getSite());
+        contactView.setProfilePhoto(contactFull.getContact().getProfilePhoto());
         contactView.setSurname(contactFull.getContact().getSurname());
         contactView.setAddressInfo(contactFull.getAddress());
         PhoneDetails phoneDetails = new PhoneDetails();

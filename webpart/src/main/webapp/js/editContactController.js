@@ -55,7 +55,8 @@ App.EditContactController = (function (appConstants, utils) {
             nationality: null,
             profilePhoto: {
                 uploadedFile: null,
-                imgSrc: "img/no-user.jpg"
+                imgSrc: App.Constants.URL.profilePhoto,
+                fileName: null
             },
             addressInfo: {
                 country: null,
@@ -122,7 +123,13 @@ App.EditContactController = (function (appConstants, utils) {
                 return response.json();
             })
             .then(function (data) {
+                var contactProfileDir = App.Constants.URL.profilePhoto + "/" + data.id + "/";
                 _contactData = utils.merge({}, _contactData, data, {
+                    profilePhoto: {
+                        uploadedFile: null,
+                        imgSrc: data.profilePhoto ? (contactProfileDir + data.profilePhoto) : App.Constants.URL.profilePhoto,
+                        fileName: data.profilePhoto
+                    },
                     phoneInfo: {
                         phonesList: (data.phoneInfo.phonesList || []).map(function (phoneInfo) {
                             var phoneType = _lookupsData.phoneTypesList.filter(function (phType) {
@@ -269,6 +276,7 @@ App.EditContactController = (function (appConstants, utils) {
         };
         reader.readAsDataURL(f);
         _contactData.profilePhoto.uploadedFile = data.uploadedFile;
+        _contactData.profilePhoto.fileName = data.fileName;
     }
 
     function assignEvents() {
@@ -449,6 +457,7 @@ App.EditContactController = (function (appConstants, utils) {
             patronymic: _contactData.patronymic,
             site: _contactData.site,
             surname: _contactData.surname,
+            profilePhoto: _contactData.profilePhoto.fileName,
             addressInfo: {
                 city: _contactData.addressInfo.city,
                 country: _contactData.addressInfo.country,
@@ -486,6 +495,7 @@ App.EditContactController = (function (appConstants, utils) {
                         id: attachment.id,
                         comment: attachment.comment,
                         fileName: attachment.fileName,
+                        uploadDate: attachment.uploadDate
                     }
                 })
             }

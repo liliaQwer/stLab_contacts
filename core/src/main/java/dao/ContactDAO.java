@@ -44,6 +44,7 @@ public class ContactDAO implements DAO<Contact>{
             contact.setGender(rs.getInt("gender_id"));
             contact.setMaritalStatus(rs.getInt("marital_status_id"));
             contact.setNationality(rs.getString("nationality"));
+            contact.setProfilePhoto(rs.getString("profile_photo"));
             return contact;
         } catch (Exception e) {
             logger.error(e);
@@ -108,7 +109,7 @@ public class ContactDAO implements DAO<Contact>{
     @Override
     public int edit(Contact o) throws ApplicationException {
         String updateQuery = "UPDATE contact SET name = ?, patronymic = ?, surname = ?, birthday = ?, company = ?, " +
-                "nationality = ?, marital_status_id = ?, site = ?, email = ?, gender_id = ? WHERE (id = ?)";
+                "nationality = ?, marital_status_id = ?, site = ?, email = ?, gender_id = ?, profile_photo = ? WHERE (id = ?)";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement insertSt = connection.prepareStatement(updateQuery)
         ){
@@ -122,7 +123,8 @@ public class ContactDAO implements DAO<Contact>{
             insertSt.setObject(8, getStringOrNull(o.getSite()));
             insertSt.setString(9, getStringOrNull(o.getEmail()));
             insertSt.setObject(10, o.getGender(), Types.INTEGER);
-            insertSt.setInt(11, o.getId());
+            insertSt.setString(11, getStringOrNull(o.getProfilePhoto()));
+            insertSt.setInt(12, o.getId());
             logger.info(insertSt.toString());
             return insertSt.executeUpdate();
         } catch (Exception e) {
@@ -153,7 +155,7 @@ public class ContactDAO implements DAO<Contact>{
     @Override
     public int save(Contact o) throws ApplicationException {
         String insertQuery = "insert into contact(name, patronymic, surname, birthday, company, nationality, marital_status_id," +
-                " email, gender_id, site, active_status) values(?,?,?,?,?,?,?,?,?,?,?)";
+                " email, gender_id, site, profile_photo, active_status) values(?,?,?,?,?,?,?,?,?,?,?,?)";
         String lastIdQuery = "SELECT last_insert_id()";
         int result;
         try (Connection connection = dataSource.getConnection();
@@ -170,7 +172,8 @@ public class ContactDAO implements DAO<Contact>{
             insertSt.setString(8, getStringOrNull(o.getEmail()));
             insertSt.setObject(9, o.getGender(), Types.INTEGER);
             insertSt.setObject(10, getStringOrNull(o.getSite()));
-            insertSt.setString(11, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
+            insertSt.setObject(11, getStringOrNull(o.getProfilePhoto()));
+            insertSt.setString(12, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
             logger.info(insertSt.toString());
             result = insertSt.executeUpdate();
             if (result == 1){

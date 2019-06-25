@@ -5,7 +5,7 @@ import java.util.List;
 public class ContactFull {
     private Contact contact;
     private Address address;
-    private Photo photo;
+    private String profilePhoto;
     private List<Attachment> attachmentsList;
     private List<Phone> phonesList;
 
@@ -31,15 +31,6 @@ public class ContactFull {
     public void setAddress(Address address) {
         this.address = address;
     }
-
-    public Photo getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(Photo photo) {
-        this.photo = photo;
-    }
-
     public List<Attachment> getAttachmentsList() {
         return attachmentsList;
     }
@@ -54,5 +45,13 @@ public class ContactFull {
 
     public void setPhonesList(List<Phone> phonesList) {
         this.phonesList = phonesList;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }

@@ -1,6 +1,5 @@
 package model;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 public class Contact {
@@ -15,13 +14,14 @@ public class Contact {
     private String nationality;
     private Integer gender;
     private Integer maritalStatus;
+    private String profilePhoto;
 
     public Contact() {
 
     }
 
     public Contact(int id, String name, String surname, String patronymic, LocalDate birthday, String company, String site,
-                   String email, String nationality, Integer gender, Integer maritalStatus) {
+                   String email, String nationality, Integer gender, Integer maritalStatus, String profilePhoto) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -33,8 +33,8 @@ public class Contact {
         this.nationality = nationality;
         this.gender = gender;
         this.maritalStatus = maritalStatus;
+        this.profilePhoto = profilePhoto;
     }
-
 
     public int getId() {
         return id;
@@ -123,5 +123,13 @@ public class Contact {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }

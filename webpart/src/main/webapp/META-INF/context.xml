@@ -7,5 +7,5 @@
               username="karavaichyk"
               password="zaqwsx"
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/contacts_karavaichyk?serverTimezone=EST5EDT"/>
+              url="jdbc:mysql://localhost:3306/contacts_karavaichyk?serverTimezone=EST5EDT&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
 </Context>

@@ -1,6 +1,8 @@
 App.Constants = {
     PAGE_NUMBER_DEFAULT: 1,
     PAGE_SIZE_DEFAULT: 10,
+    //DEFAULT_PROFILE_PHOTO: "img/no-user.jpg",
+
     messages: {
         ERROR_MESSAGE: "Error has occurred during request",
         DELETE_CONTACT_CONFIRMATION: "Are you sure you want to delete selected contacts?",
@@ -17,6 +19,8 @@ App.Constants = {
     },
     URL: {
         contact: "contacts",
-        lookups: "lookups"
+        lookups: "lookups",
+        profilePhoto: "profilePhotos",
+        attachment: "attachments"
     }
 };

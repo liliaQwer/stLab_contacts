@@ -39,22 +39,20 @@
                 <th>Birthday</th>
                 <th>Address</th>
                 <th>Company</th>
-                <th>Status</th>
                 <th>Edit/Delete</th>
             </tr>
             {{#contactsList}}
             <tr>
                 <td><input type="checkbox" class="check" value="{{id}}" id="checkFor_{{id}}"></td>
-                <td><a href="#">{{fullName}}</a></td>
+                <td><span class="link editContact" data-id="{{id}}">{{fullName}}</span></td>
                 <td align="right">{{birthday}}</td>
                 <td>{{address}}</td>
                 <td>{{company}}</td>
-                <td></td>
                 <td align="center">
-                        <span class="link editContact" data-id="{{id}}">
+                        <span class="cursor-pointer editContact" data-id="{{id}}">
                             <img src="img/edit.png" alt="Edit contact" class="editImage">
                         </span>
-                    <span class="link deleteContact" data-id="{{id}}">
+                    <span class="cursor-pointer deleteContact" data-id="{{id}}">
                             <img src="img/delete.png" alt="Delete contact" class="editImage marginLeft25">
                         </span>
                 </td>
@@ -262,7 +260,8 @@
                             <tr>
                                 <td><input type="checkbox" class="check attachment_check" value="{{id}}"
                                            id="checkFor_{{id}}"></td>
-                                <td><a href="#">{{fileName}}</a>
+                                <td>{{^isNew}}<a href="attachments/{{contactId}}/{{fileName}}">{{fileName}}</a>{{/isNew}}
+                                    {{#isNew}}{{fileName}}{{/isNew}}
                                 </td>
                                 <td>{{uploadDate}}</td>
                                 <td>{{comment}}</td>
@@ -386,6 +385,14 @@
             <button type="button" class="button" id="submitProfilePhotoFormButton">Save</button>
         </div>
     </div>
+</script>
+
+<script type="template/mustache" id="searchTemplate">
+    <h1>Contact Search</h1>
+
+    <form class="marginBottom5" id="searchForm">
+
+    </form>
 </script>
 
 <script type="text/javascript">

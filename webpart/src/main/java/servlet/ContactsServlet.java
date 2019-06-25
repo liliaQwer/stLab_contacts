@@ -1,15 +1,14 @@
 package servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import model.Attachment;
-import model.Contact;
 import model.ContactFull;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import service.ContactService;
 import service.ContactServiceImpl;
+import upload.FileHelper;
 import utils.ApplicationException;
 import view.ContactView;
 import view.ContactsAndPageInfo;
@@ -23,13 +22,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 
 @WebServlet(urlPatterns = {"/contacts/*"})
 public class ContactsServlet extends HttpServlet {
-    private static final String UPLOAD_DIRECTORY = "upload";
     private static final int THRESHOLD_SIZE = 1024 * 1024 * 3;  // 3MB
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
     private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
@@ -53,53 +52,31 @@ public class ContactsServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        // configures upload settings
-        DiskFileItemFactory factory = new DiskFileItemFactory();
-        factory.setSizeThreshold(THRESHOLD_SIZE);
-        factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
-
-        ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setFileSizeMax(MAX_FILE_SIZE);
-        upload.setSizeMax(MAX_REQUEST_SIZE);
-
-        // constructs the directory path to store upload file
-        String uploadPath = getServletContext().getRealPath("")
-                + File.separator + UPLOAD_DIRECTORY;
-        System.out.println(uploadPath);
-        // creates the directory if it does not exist
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdir();
-        }
-
+        System.out.println("doPut");
+        request.setCharacterEncoding("utf-8");
         ContactView contact = null;
-        try {
-            // parses the request's content to extract file data
-            List formItems = upload.parseRequest(request);
+        List<FileItem> fileItems = new ArrayList<>();
+        try{
+            List formItems = getFormItems(request);
             Iterator iter = formItems.iterator();
             // iterates over form's fields
             while (iter.hasNext()) {
                 Object param = iter.next();
                 System.out.println("param = " + param);
                 FileItem item = (FileItem) param;
-                System.out.println("item.getFieldName() = " + item.getFieldName());
-                // processes only fields that are not form fields
                 if (!item.isFormField()) {
-                    System.out.println("content type = " + item.getContentType() + " item.getFileName=" + item.getName());
-                    String fileName = new File(item.getName()).getName();
-                    System.out.println("fileName =" + fileName);
-                    String filePath = uploadPath + File.separator + fileName;
-                    File storeFile = new File(filePath);
-                    // saves the file on disk
-                    item.write(storeFile);
+                    fileItems.add(item);
                 } else {
                     System.out.println("value=" + item.getString());
                     ObjectMapper mapper = new ObjectMapper();
-                    contact = mapper.readValue(item.getString(), ContactView.class);
+                    contact = mapper.readValue(item.getString().getBytes("utf-8"), ContactView.class);
                 }
             }
             ContactService service = new ContactServiceImpl(dataSource);
             service.edit(contact);
+            int contactId = contact.getId();
+            FileHelper fileCreator = FileHelper.getInstance();
+            fileItems.forEach(item->fileCreator.upload(item, contactId));
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("message", "There was an error: " + ex.getMessage());
@@ -117,6 +94,37 @@ public class ContactsServlet extends HttpServlet {
             writer.flush();
             return;
         }
+
+        ContactView contact = null;
+        List<FileItem> fileItems = new ArrayList<>();
+        try {
+            List formItems = getFormItems(request);
+            Iterator iter = formItems.iterator();
+            // iterates over form's fields
+            while (iter.hasNext()) {
+                Object param = iter.next();
+                System.out.println("param = " + param);
+                FileItem item = (FileItem) param;
+                if (!item.isFormField()) {
+                    fileItems.add(item);
+                } else {
+                    System.out.println("value=" + item.getString());
+                    ObjectMapper mapper = new ObjectMapper();
+                    contact = mapper.readValue(item.getString(), ContactView.class);
+                }
+            }
+            ContactService service = new ContactServiceImpl(dataSource);
+            service.save(contact);
+            int contactId = contact.getId();
+            FileHelper fileCreator = FileHelper.getInstance();
+            fileItems.forEach(item->fileCreator.upload(item, contactId));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            request.setAttribute("message", "There was an error: " + ex.getMessage());
+        }
+    }
+
+    private List getFormItems(HttpServletRequest request) throws FileUploadException {
         // configures upload settings
         DiskFileItemFactory factory = new DiskFileItemFactory();
         factory.setSizeThreshold(THRESHOLD_SIZE);
@@ -125,51 +133,9 @@ public class ContactsServlet extends HttpServlet {
         ServletFileUpload upload = new ServletFileUpload(factory);
         upload.setFileSizeMax(MAX_FILE_SIZE);
         upload.setSizeMax(MAX_REQUEST_SIZE);
-
-        // constructs the directory path to store upload file
-        String uploadPath = getServletContext().getRealPath("")
-                + File.separator + UPLOAD_DIRECTORY;
-        System.out.println(uploadPath);
-        // creates the directory if it does not exist
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdir();
-        }
-
-        ContactView contact = null;
-        try {
-            // parses the request's content to extract file data
-            List formItems = upload.parseRequest(request);
-            Iterator iter = formItems.iterator();
-            // iterates over form's fields
-            while (iter.hasNext()) {
-                Object param = iter.next();
-                System.out.println("param = " + param);
-                FileItem item = (FileItem) param;
-                System.out.println("item.getFieldName() = " + item.getFieldName());
-                // processes only fields that are not form fields
-                if (!item.isFormField()) {
-                    System.out.println("content type = " + item.getContentType() + " item.getFileName=" + item.getName());
-                    String fileName = new File(item.getName()).getName();
-                    System.out.println("fileName =" + fileName);
-                    String filePath = uploadPath + File.separator + fileName;
-                    File storeFile = new File(filePath);
-                    // saves the file on disk
-                    item.write(storeFile);
-                } else {
-                    System.out.println("value=" + item.getString());
-                    ObjectMapper mapper = new ObjectMapper();
-                    contact = mapper.readValue(item.getString(), ContactView.class);
-
-                }
-            }
-            ContactService service = new ContactServiceImpl(dataSource);
-            service.save(contact);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            request.setAttribute("message", "There was an error: " + ex.getMessage());
-        }
+        return upload.parseRequest(request);
     }
+
 
     private void getContactList(HttpServletRequest request, HttpServletResponse response) {
         int pageNumber = Integer.parseInt(request.getParameter("pageNumber"));

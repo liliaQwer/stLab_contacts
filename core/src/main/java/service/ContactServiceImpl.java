@@ -61,12 +61,40 @@ public class ContactServiceImpl implements ContactService{
                     phoneDAO.delete(id);
                 }
             }
+            phoneDetails.getPhonesList().forEach(phone->{
+                phone.setContactId(o.getId());
+                try {
+                    if (phone.getId() > 0) {
+                        phoneDAO.edit(phone);
+                    } else {
+                        phoneDAO.save(phone);
+                    }
+                }catch (ApplicationException e) {
+                    e.printStackTrace();
+                }
+            });
             AttachmentDetails attachmentDetails= o.getAttachmentsInfo();
             if (attachmentDetails.getDeletedIds() != null){
                 for (Integer id: attachmentDetails.getDeletedIds()){
                     attachmentDAO.delete(id);
                 }
             }
+            attachmentDetails.getAttachmentsList().forEach(attachmentView->{
+                attachmentView.setContactId(o.getId());
+                Attachment attachment;
+                try {
+                    attachment = ViewHelper.prepareAttachment(attachmentView);
+                    if (attachment.getId() > 0) {
+                        attachmentDAO.edit(attachment);
+                    } else {
+                        attachmentDAO.save(attachment);
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }catch (ApplicationException e) {
+                    e.printStackTrace();
+                }
+            });
         } catch (ParseException e) {
             e.printStackTrace();
             throw new ApplicationException();
@@ -87,7 +115,7 @@ public class ContactServiceImpl implements ContactService{
 
     @Override
     public void save(ContactView o) throws ApplicationException {
-        int contactId = 0;
+        int contactId;
         try {
             contactId = contactDAO.save(o.getContact());
         } catch (ParseException e) {

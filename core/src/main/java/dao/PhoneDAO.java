@@ -70,7 +70,22 @@ public class PhoneDAO implements DAO<Phone> {
 
     @Override
     public int edit(Phone o) throws ApplicationException {
-        return 0;
+        String insertQuery = "update phone set id=?, country_code=?, oper_code=?, number=?, type=?, comment=? where contact_id=?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(insertQuery)){
+            st.setInt(1, o.getId());
+            st.setInt(2, o.getCountryCode());
+            st.setInt(3, o.getOperatorCode());
+            st.setInt(4, o.getPhoneNumber());
+            st.setInt(5, o.getPhoneType());
+            st.setString(6, getStringOrNull(o.getComment()));
+            st.setInt(7, o.getContactId());
+            logger.info(st.toString());
+            return st.executeUpdate();
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

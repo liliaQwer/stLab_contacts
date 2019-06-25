@@ -1,14 +1,9 @@
 package view;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import model.Address;
 import model.Contact;
 import utils.DateFormatter;
-
-import java.sql.Date;
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.List;
 
 public class ContactView{
     private int id;
@@ -22,6 +17,7 @@ public class ContactView{
     private Integer gender;
     private Integer maritalStatus;
     private String nationality;
+    private String profilePhoto;
     private Address addressInfo;
     private PhoneDetails phoneInfo;
     private AttachmentDetails attachmentsInfo;
@@ -121,7 +117,8 @@ public class ContactView{
 
 
     public Contact getContact() throws ParseException {
-        return new Contact(id, name, surname, patronymic, DateFormatter.parseDate(birthday), company, site, email, nationality, gender, maritalStatus);
+        return new Contact(id, name, surname, patronymic, DateFormatter.parseDate(birthday), company, site, email,
+                nationality, gender, maritalStatus, profilePhoto);
     }
 
     public PhoneDetails getPhoneInfo() {
@@ -146,5 +143,13 @@ public class ContactView{
 
     public void setBirthday(String birthday) {
         this.birthday = birthday;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 }

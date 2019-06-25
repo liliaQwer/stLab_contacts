@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,10 +54,9 @@ public class ContactsServlet extends HttpServlet {
             return;
         }
         System.out.println("doPut");
-        request.setCharacterEncoding("utf-8");
         ContactView contact = null;
         List<FileItem> fileItems = new ArrayList<>();
-        try{
+        try {
             List formItems = getFormItems(request);
             Iterator iter = formItems.iterator();
             // iterates over form's fields
@@ -69,14 +69,14 @@ public class ContactsServlet extends HttpServlet {
                 } else {
                     System.out.println("value=" + item.getString());
                     ObjectMapper mapper = new ObjectMapper();
-                    contact = mapper.readValue(item.getString().getBytes("utf-8"), ContactView.class);
+                    contact = mapper.readValue(item.getString("UTF-8"), ContactView.class);
                 }
             }
             ContactService service = new ContactServiceImpl(dataSource);
             service.edit(contact);
             int contactId = contact.getId();
             FileHelper fileCreator = FileHelper.getInstance();
-            fileItems.forEach(item->fileCreator.upload(item, contactId));
+            fileItems.forEach(item -> fileCreator.upload(item, contactId));
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("message", "There was an error: " + ex.getMessage());
@@ -117,7 +117,7 @@ public class ContactsServlet extends HttpServlet {
             service.save(contact);
             int contactId = contact.getId();
             FileHelper fileCreator = FileHelper.getInstance();
-            fileItems.forEach(item->fileCreator.upload(item, contactId));
+            fileItems.forEach(item -> fileCreator.upload(item, contactId));
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("message", "There was an error: " + ex.getMessage());

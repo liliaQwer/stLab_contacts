@@ -28,7 +28,7 @@
         </div>
         <div id="controlButtonsBlock">
             <div class="button marginLeft5" id="addContact">Add Contact</div>
-            <div class="button marginLeft5">Search Contact</div>
+            <div class="button marginLeft5" id="searchContact">Search Contact</div>
         </div>
     </div>
     <div id="contactsListBlock">
@@ -389,9 +389,77 @@
 
 <script type="template/mustache" id="searchTemplate">
     <h1>Contact Search</h1>
-
     <form class="marginBottom5" id="searchForm">
+        <fieldset>
+            <legend>Contact Info</legend>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name" type="text" placeholder="Enter name"/>
+            </div>
+            <div class="form-group">
+                <label for="surname">Surname:</label>
+                <input id="surname" type="text"  placeholder="Enter surname"/>
+            </div>
+            <div class="form-group">
+                <label for="patronymic">Patronymic:</label>
+                <input id="patronymic" type="text" placeholder="Enter patronymic"/>
+            </div>
+            <div class="form-group">
+                <label for="birthday">Birthday:</label>
+                <input id="birthday" type="date" placeholder="Enter birthday"/>
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender">
+                    <option value="" disabled selected>Select gender</option>
+                    {{#genderList}}
+                    <option value="{{id}}" {{genderSelected}}>{{description}}</option>
+                    {{/genderList}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="marital_status">Marital status:</label>
+                <select id="marital_status">
+                    <option value="" disabled selected>Select marital status</option>
+                    {{#maritalStatusList}}
+                    <option value="{{id}}" {{maritalStatusSelected}}>{{description}}</option>
+                    {{/maritalStatusList}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nationality">Nationality:</label>
+                <input id="nationality" type="text" placeholder="Enter nationality"/>
+            </div>
+        </fieldset>
+        <fieldset class="marginBottom5">
+            <legend>Address info</legend>
+            <div class="flex">
+                <div class="flex-grow-1">
+                    <div class="form-group">
+                        <label for="country">Country:</label>
+                        <input id="country" type="text" placeholder="Enter country" value="{{country}}"/>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input id="city" type="text" placeholder="Enter city" value="{{city}}"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="street">Street:</label>
+                        <input id="street" type="text" placeholder="Enter street" value="{{street}}"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postalCode">Postal code:</label>
+                        <input id="postalCode" type="text" placeholder="Enter postal code" value="{{postalCode}}"/>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <div>
+            <input type="submit" id="submitButton">
+        </div>
     </form>
 </script>
 
@@ -405,6 +473,7 @@
 <script type="text/javascript" src="js/editPhoneController.js"></script>
 <script type="text/javascript" src="js/editContactController.js"></script>
 <script type="text/javascript" src="js/contactsController.js"></script>
+<script type="text/javascript" src="js/searchController.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>

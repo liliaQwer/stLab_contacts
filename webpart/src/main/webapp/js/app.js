@@ -1,9 +1,13 @@
-(function (appConstants, contactsController, editContactController, editPhoneController, editAttachmentController, editProfilePhotoController) {
+(function (appConstants, contactsController, editContactController, editPhoneController, editAttachmentController,
+           editProfilePhotoController, searchController) {
     window.onload = function () {
         contactsController.init();
         contactsController.callbacks.onAddContact = function (contactId) {
             editContactController.init(contactId);
         };
+        contactsController.callbacks.onSearchContact = function(){
+            searchController.init();
+        }
         editContactController.callbacks.onCancel = function () {
             contactsController.init();
         }
@@ -36,4 +40,5 @@
             editContactController.updatePhoto(data);
         }
     };
-})(App.Constants, App.ContactsController, App.EditContactController, App.EditPhoneController, App.EditAttachmentController, App.EditProfilePhotoController);
+})(App.Constants, App.ContactsController, App.EditContactController, App.EditPhoneController,
+    App.EditAttachmentController, App.EditProfilePhotoController, App.SearchController);

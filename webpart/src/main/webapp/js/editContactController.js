@@ -55,7 +55,7 @@ App.EditContactController = (function (appConstants, utils) {
             nationality: null,
             profilePhoto: {
                 uploadedFile: null,
-                imgSrc: App.Constants.URL.profilePhoto,
+                imgSrc: appConstants.URL.profilePhoto,
                 fileName: null
             },
             addressInfo: {
@@ -123,7 +123,7 @@ App.EditContactController = (function (appConstants, utils) {
                 return response.json();
             })
             .then(function (data) {
-                var contactProfileDir = App.Constants.URL.profilePhoto + "/" + data.id + "/";
+                var contactProfileDir = appConstants.URL.profilePhoto + "/" + data.id + "/";
                 _contactData = utils.merge({}, _contactData, data, {
                     profilePhoto: {
                         uploadedFile: null,

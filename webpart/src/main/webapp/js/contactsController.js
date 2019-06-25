@@ -19,6 +19,7 @@ App.ContactsController = (function (appConstants) {
         _deleteContactsButton,
         _addContactButton,
         _sendEmailButton,
+        _searchContactButton,
         _callbacks;
 
 
@@ -122,6 +123,7 @@ App.ContactsController = (function (appConstants) {
         _deleteContactsButton = document.getElementById("deleteContacts");
         _sendEmailButton = document.getElementById("sendEmail");
         _addContactButton = document.getElementById("addContact");
+        _searchContactButton = document.getElementById("searchContact");
 
         for (var i = 0; i < _deleteContactButtons.length; i++) {
             var deleteButton = _deleteContactButtons[i];
@@ -165,7 +167,11 @@ App.ContactsController = (function (appConstants) {
             deleteContact(idList.join(","));
         }
 
-
+        _searchContactButton.onclick = function(){
+            if (_callbacks.onSearchContact && typeof _callbacks.onSearchContact == 'function'){
+                _callbacks.onSearchContact();
+            }
+        }
 
         _addContactButton.onclick = function () {
             if (_callbacks.onAddContact && typeof _callbacks.onAddContact == 'function') {
@@ -205,7 +211,8 @@ App.ContactsController = (function (appConstants) {
     }
 
     _callbacks = {
-        onAddContact: false
+        onAddContact: false,
+        searchContact: false
     };
 
     return {

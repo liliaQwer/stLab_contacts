@@ -17,6 +17,14 @@
 
 <script type="template/mustache" id="contactsListTemplate">
     <h1>Contacts List</h1>
+    <div>
+        {{#searchCriteriaValues}}
+        <span class="searchCriteria">{{.}}</span>
+        {{/searchCriteriaValues}}
+        {{#hasSearchCriteria}}
+        <span class="clearSearch">Clear filter</span>
+        {{/hasSearchCriteria}}
+    </div>
     <div class="controls">
         <div id="pageSizeSelectBlock">
             <span>Items per page:</span>
@@ -389,52 +397,52 @@
 
 <script type="template/mustache" id="searchTemplate">
     <h1>Contact Search</h1>
-    <form class="marginBottom5" id="searchForm">
-        <fieldset>
-            <legend>Contact Info</legend>
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input id="name" type="text" placeholder="Enter name"/>
-            </div>
-            <div class="form-group">
-                <label for="surname">Surname:</label>
-                <input id="surname" type="text"  placeholder="Enter surname"/>
-            </div>
-            <div class="form-group">
-                <label for="patronymic">Patronymic:</label>
-                <input id="patronymic" type="text" placeholder="Enter patronymic"/>
-            </div>
-            <div class="form-group">
-                <label for="birthday">Birthday:</label>
-                <input id="birthday" type="date" placeholder="Enter birthday"/>
-            </div>
-            <div class="form-group">
-                <label for="gender">Gender</label>
-                <select id="gender">
-                    <option value="" disabled selected>Select gender</option>
-                    {{#genderList}}
-                    <option value="{{id}}" {{genderSelected}}>{{description}}</option>
-                    {{/genderList}}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="marital_status">Marital status:</label>
-                <select id="marital_status">
-                    <option value="" disabled selected>Select marital status</option>
-                    {{#maritalStatusList}}
-                    <option value="{{id}}" {{maritalStatusSelected}}>{{description}}</option>
-                    {{/maritalStatusList}}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="nationality">Nationality:</label>
-                <input id="nationality" type="text" placeholder="Enter nationality"/>
-            </div>
-        </fieldset>
+    <!--<div class="flex flex-wrap">-->
+    <form id="searchForm">
         <fieldset class="marginBottom5">
-            <legend>Address info</legend>
-            <div class="flex">
-                <div class="flex-grow-1">
+            <legend>Contact Info</legend>
+            <div class="flex flex-wrap">
+                <div class="flex flex-column flex-basis-400">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input id="name" type="text" placeholder="Enter name"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname">Surname:</label>
+                        <input id="surname" type="text" placeholder="Enter surname"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="patronymic">Patronymic:</label>
+                        <input id="patronymic" type="text" placeholder="Enter patronymic"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">Birthday:</label>
+                        <input id="birthday" type="date" placeholder="Enter birthday"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender">
+                            <option value="" disabled selected>Select gender</option>
+                            {{#genderList}}
+                            <option value="{{id}}">{{description}}</option>
+                            {{/genderList}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="marital_status">Marital status:</label>
+                        <select id="marital_status">
+                            <option value="" disabled selected>Select marital status</option>
+                            {{#maritalStatusList}}
+                            <option value="{{id}}">{{description}}</option>
+                            {{/maritalStatusList}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality">Nationality:</label>
+                        <input id="nationality" type="text" placeholder="Enter nationality"/>
+                    </div>
+                </div>
+                <div class="flex flex-column flex-basis-400">
                     <div class="form-group">
                         <label for="country">Country:</label>
                         <input id="country" type="text" placeholder="Enter country" value="{{country}}"/>
@@ -454,11 +462,13 @@
                         <label for="postalCode">Postal code:</label>
                         <input id="postalCode" type="text" placeholder="Enter postal code" value="{{postalCode}}"/>
                     </div>
+
                 </div>
             </div>
         </fieldset>
         <div>
-            <input type="submit" id="submitButton">
+            <button type="button" class="button" id="cancelButton">Cancel</button>
+            <button type="submit" class="button" id="submitSearchFormButton">Search</button>
         </div>
     </form>
 </script>

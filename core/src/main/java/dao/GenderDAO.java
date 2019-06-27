@@ -4,6 +4,7 @@ import model.IdDescription;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
+import utils.SearchCriteria;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -26,12 +27,12 @@ public class GenderDAO implements DAO<IdDescription>{
     }
 
     @Override
-    public List<IdDescription> getPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<IdDescription> getPage(SearchCriteria searchCriteria) throws ApplicationException {
         return null;
     }
 
     @Override
-    public int getCount() throws ApplicationException {
+    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
         return 0;
     }
 

@@ -3,6 +3,7 @@ package service;
 import dao.*;
 import model.*;
 import utils.ApplicationException;
+import utils.SearchCriteria;
 import view.*;
 
 import javax.sql.DataSource;
@@ -33,8 +34,8 @@ public class ContactServiceImpl implements ContactService{
     }
 
     @Override
-    public List<ContactFull> getPage(int pageNumber, int pageSize) throws ApplicationException {
-        List<Contact> contactList = contactDAO.getPage(pageNumber, pageSize);
+    public List<ContactFull> getPage(SearchCriteria searchCriteria) throws ApplicationException {
+        List<Contact> contactList = contactDAO.getPage(searchCriteria);
         List<ContactFull> contactFullList = new ArrayList<>();
         for (Contact contact : contactList) {
             ContactFull contactFull = new ContactFull(contact);
@@ -45,8 +46,8 @@ public class ContactServiceImpl implements ContactService{
     }
 
     @Override
-    public int getCount() throws ApplicationException {
-        return contactDAO.getCount();
+    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
+        return contactDAO.getCount(searchCriteria);
     }
 
     @Override

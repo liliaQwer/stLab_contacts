@@ -4,6 +4,7 @@ import model.Address;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
+import utils.SearchCriteria;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -42,12 +43,12 @@ public class AddressDAO implements DAO<Address>{
     }
 
     @Override
-    public List<Address> getPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<Address> getPage(SearchCriteria searchCriteria) throws ApplicationException {
         return null;
     }
 
     @Override
-    public int getCount() throws ApplicationException {
+    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
         return 0;
     }
 

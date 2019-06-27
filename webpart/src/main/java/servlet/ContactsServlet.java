@@ -10,8 +10,10 @@ import service.ContactService;
 import service.ContactServiceImpl;
 import upload.FileHelper;
 import utils.ApplicationException;
+import utils.DateFormatter;
+import utils.SearchCriteria;
 import view.ContactView;
-import view.ContactsAndPageInfo;
+import view.ContactsAndSearchCriteria;
 import view.ViewHelper;
 
 import javax.annotation.Resource;
@@ -22,10 +24,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 
 @WebServlet(urlPatterns = {"/contacts/*"})
@@ -138,15 +143,25 @@ public class ContactsServlet extends HttpServlet {
 
 
     private void getContactList(HttpServletRequest request, HttpServletResponse response) {
-        int pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
-        int pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        ContactsAndPageInfo contactsPageView = null;
+        SearchCriteria searchCriteria;
+        try {
+            searchCriteria = parseRequestParams(request);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        ContactsAndSearchCriteria contactsPageView = null;
         ContactService service = new ContactServiceImpl(dataSource);
         try {
-            contactsPageView = ViewHelper.prepareContactsAndPageInfoView(service.getPage(pageNumber, pageSize),
-                    pageNumber, pageSize, service.getCount());
+            service.getPage(searchCriteria);
+            contactsPageView = ViewHelper.prepareContactsAndPageInfoView(service.getPage(searchCriteria),
+                    searchCriteria, service.getCount(searchCriteria));
             sendJsonResponse(response, contactsPageView);
         } catch (ApplicationException e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
         }
@@ -158,6 +173,41 @@ public class ContactsServlet extends HttpServlet {
 //        } catch (MessagingException e) {
 //            e.printStackTrace();
 //        }
+    }
+
+    private SearchCriteria parseRequestParams(HttpServletRequest request) throws IllegalAccessException, ParseException {
+        SearchCriteria searchCriteria = new SearchCriteria();
+        Field[] allFields = SearchCriteria.class.getDeclaredFields();
+        List<String> fieldNames = Arrays.stream(allFields).map(field->field.getName()).collect(Collectors.toList());
+        Enumeration requestParams= request.getParameterNames();
+        while (requestParams.hasMoreElements()){
+            String param = requestParams.nextElement().toString();
+            if (request.getParameter(param).trim().isEmpty()){
+                continue;
+            }
+            System.out.println("*************Param = " + param);
+            int fieldIdx = fieldNames.indexOf(param);
+            System.out.println("Idx = " + fieldIdx);
+            System.out.println("fields[fieldIdx].getType() = " + allFields[fieldIdx].getType());
+            System.out.println("request.getParameter(param) = " + request.getParameter(param));
+            if (fieldIdx != -1){
+                if (allFields[fieldIdx].getType() == Integer.class){
+                    System.out.println("Int try = ");
+                    allFields[fieldIdx].setAccessible(true);
+                    allFields[fieldIdx].set(searchCriteria, Integer.parseInt(request.getParameter(param)));
+                }else if (allFields[fieldIdx].getType() == String.class){
+                    allFields[fieldIdx].setAccessible(true);
+                    allFields[fieldIdx].set(searchCriteria, request.getParameter(param));
+                    System.out.println("in String.class) = " + request.getParameter(param));
+                }else if(allFields[fieldIdx].getType() == LocalDate.class){
+                    allFields[fieldIdx].setAccessible(true);
+                    allFields[fieldIdx].set(searchCriteria, DateFormatter.parseDate(request.getParameter(param)));
+                }
+            }
+        }
+        System.out.println("searchCriteria pN=" + searchCriteria.getPageNumber() + " ps=" + searchCriteria.getPageSize() +
+                " n=" + searchCriteria.getName());
+        return searchCriteria;
     }
 
     private void getContact(HttpServletRequest request, HttpServletResponse response) throws IOException {

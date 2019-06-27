@@ -53,6 +53,25 @@ th {
     outline: none;
 }
 
+.searchCriteria {
+    background-color: #c4cbd3;
+    padding: 5px;
+    color: #ebeaf3;
+    border-radius: 5px;
+}
+
+.clearSearch{
+    background-color: #d5d3d3;
+    padding: 5px;
+    color: #565656;
+    border-radius: 5px;
+}
+
+.clearSearch:hover{
+    background-color: #aec6ef;
+    cursor: pointer;
+}
+
 .button {
     border-radius: 5px;
     background-color: #d5d3d3; /*#e0e1e4*/
@@ -157,6 +176,10 @@ fieldset legend {
 
 .form-group label {
     flex-basis: 120px;
+}
+
+.flex-basis-400{
+    flex-basis: 400px;
 }
 
 .form-group input, .form-group select, .form-group textarea {

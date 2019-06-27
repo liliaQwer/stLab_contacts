@@ -11,7 +11,19 @@ App.Utils = (function () {
         return resObj;
     }
 
+    function encodeQueryString(params) {
+        var keys = Object.keys(params);
+        var str = keys.length
+            ? "?" + keys.map(function(key){
+                    return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+                }).join("&")
+            : "";
+        console.log(str);
+        return str;
+    }
+
     return {
-        merge: mergeObjects
+        merge: mergeObjects,
+        encodeQueryString: encodeQueryString
     }
 })();

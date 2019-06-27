@@ -4,6 +4,7 @@ import model.Attachment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
+import utils.SearchCriteria;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -27,12 +28,12 @@ public class AttachmentDAO implements DAO<Attachment> {
     }
 
     @Override
-    public List<Attachment> getPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<Attachment> getPage(SearchCriteria searchCriteria) throws ApplicationException {
         return null;
     }
 
     @Override
-    public int getCount() throws ApplicationException {
+    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
         return 0;
     }
 

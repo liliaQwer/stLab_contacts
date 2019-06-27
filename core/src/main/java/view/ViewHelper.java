@@ -1,10 +1,10 @@
 package view;
 
-import dao.AttachmentDAO;
 import model.Attachment;
 import model.ContactFull;
 import model.IdDescription;
 import utils.DateFormatter;
+import utils.SearchCriteria;
 
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 
 public class ViewHelper {
 
-    public static ContactsAndPageInfo prepareContactsAndPageInfoView(List<ContactFull> list, int pageNumber, int pageSize, int totalAmount) {
+    public static ContactsAndSearchCriteria prepareContactsAndPageInfoView(List<ContactFull> list, SearchCriteria searchCriteria, int totalAmount) {
         List<ContactShort> contactShortList = new ArrayList<>();
         for (ContactFull contact : list) {
             ContactShort view = new ContactShort(contact);
             contactShortList.add(view);
         }
-        return new ContactsAndPageInfo(contactShortList, pageNumber, pageSize, totalAmount);
+        return new ContactsAndSearchCriteria(contactShortList, searchCriteria, totalAmount);
     }
 
     public static LookupsView prepareLookupsView(List<IdDescription> genderList, List<IdDescription> maritalStatusList,

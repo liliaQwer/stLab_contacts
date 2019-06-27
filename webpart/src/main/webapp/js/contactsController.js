@@ -1,13 +1,14 @@
-App.ContactsController = (function (appConstants) {
+App.ContactsController = (function (appConstants, appUtils) {
 
     var _messageErrorElement,
         _containerElement,
         _pageSizeSelector,
         _mustacheTemplate,
-        _pageSize,
         _pageSizeOptions,
         _currentPage,
         _totalContacts,
+        _searchCriteria,
+        _searchCriteriaValues,
         _contactsList,
         _errorMessage,
         _goNextPageButton,
@@ -20,6 +21,7 @@ App.ContactsController = (function (appConstants) {
         _addContactButton,
         _sendEmailButton,
         _searchContactButton,
+        _clearSearchCretariaButton,
         _callbacks;
 
 
@@ -29,24 +31,26 @@ App.ContactsController = (function (appConstants) {
 
         _mustacheTemplate = document.getElementById("contactsListTemplate").innerHTML;
 
-        _pageSize = appConstants.PAGE_SIZE_DEFAULT;
-        _currentPage = 0;
+        _currentPage = appConstants.PAGE_NUMBER_DEFAULT;
         _contactsList = {};
         _totalContacts = 0;
+        _searchCriteria = {
+            pageNumber: appConstants.PAGE_NUMBER_DEFAULT,
+            pageSize: appConstants.PAGE_SIZE_DEFAULT
+        }
         _pageSizeOptions = [
             {val: 10, text: "10 items"},
             {val: 20, text: "20 items"}
         ];
         _errorMessage = appConstants.messages.ERROR_MESSAGE;
-        showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
     }
 
-    function showContactsList(nextPageNumber) {
-        if (!nextPageNumber) {
-            nextPageNumber = _currentPage;
+    function showContactsList(searchCriteria) {
+        if (searchCriteria) {
+            _searchCriteria = appUtils.merge(_searchCriteria, searchCriteria);
         }
         hideErrorMessage();
-        fetch(appConstants.URL.contact + "?pageNumber=" + nextPageNumber + "&pageSize=" + _pageSize)
+        fetch(appConstants.URL.contact + appUtils.encodeQueryString(_searchCriteria))
             .then(function (response) {
                 if (response.ok) {
                     return response.json();
@@ -54,20 +58,24 @@ App.ContactsController = (function (appConstants) {
                 throw new Error(_errorMessage);
             })
             .then(function (data) {
+                fillSearchCriteriaValues();
                 _totalContacts = data.totalAmount;
-                _currentPage = nextPageNumber;
+                _currentPage = _searchCriteria.pageNumber;
                 _contactsList = data;
-                _contactsList.isFirstPage = nextPageNumber <= 1;
-                _contactsList.isLastPage = getLastPage() <= nextPageNumber;
+                _contactsList.isFirstPage = _searchCriteria.pageNumber <= 1;
+                _contactsList.isLastPage = getLastPage() <= _searchCriteria.pageNumber;
                 var rendered = Mustache.render(_mustacheTemplate, {
                     contactsList: _contactsList.contactsList,
-                    pageSize: _pageSize,
+                    searchCriteriaValues: _searchCriteriaValues,
+                    hasSearchCriteria: _searchCriteriaValues.length > 2,
+                    pageSize: _searchCriteria.pageSize,
                     isFirstPage: _contactsList.isFirstPage,
                     isLastPage: _contactsList.isLastPage,
                     pageSizeOptions: _pageSizeOptions,
-                    pageNumber: _currentPage,
+                    pageNumber: _searchCriteria.pageNumber,
+
                     pageOptionSelected: function () {
-                        if (this.val == _pageSize) {
+                        if (this.val == _searchCriteria.pageSize) {
                             return 'selected';
                         }
                         return '';
@@ -79,11 +87,20 @@ App.ContactsController = (function (appConstants) {
             .catch(function (error) {
                 showMessageError(error);
             });
-        log("currentPage = " + _currentPage);
     }
 
     function getLastPage() {
-        return Math.ceil(_totalContacts / _pageSize);
+        return Math.ceil(_totalContacts / _searchCriteria.pageSize);
+    }
+
+    function fillSearchCriteriaValues(){
+        _searchCriteriaValues = [];
+        var keys = Object.keys(_searchCriteria);
+        for (var i = 0; i < keys.length; i++) {
+            if (_searchCriteria[keys[i]]) {
+                _searchCriteriaValues.push(_searchCriteria[keys[i]]);
+            }
+        }
     }
 
     function showMessageError(error) {
@@ -124,6 +141,13 @@ App.ContactsController = (function (appConstants) {
         _sendEmailButton = document.getElementById("sendEmail");
         _addContactButton = document.getElementById("addContact");
         _searchContactButton = document.getElementById("searchContact");
+        _clearSearchCretariaButton =  document.getElementsByClassName("clearSearch");
+
+        if(_clearSearchCretariaButton){
+            _clearSearchCretariaButton[0].onclick = function(){
+
+            }
+        }
 
         for (var i = 0; i < _deleteContactButtons.length; i++) {
             var deleteButton = _deleteContactButtons[i];
@@ -165,58 +189,63 @@ App.ContactsController = (function (appConstants) {
             }
             log(idList.join(","));
             deleteContact(idList.join(","));
-        }
+        };
 
         _searchContactButton.onclick = function(){
             if (_callbacks.onSearchContact && typeof _callbacks.onSearchContact == 'function'){
                 _callbacks.onSearchContact();
             }
-        }
+        };
 
         _addContactButton.onclick = function () {
             if (_callbacks.onAddContact && typeof _callbacks.onAddContact == 'function') {
                 _callbacks.onAddContact();
             }
-        }
+        };
 
         _sendEmailButton.onclick = function () {
             showMessageError("Not implemented");
-        }
+        };
 
         _pageSizeSelector.onchange = function (e) {
-            _pageSize = e.target.value;
-            showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
-        }
+            _searchCriteria.pageSize = e.target.value;
+            showContactsList();
+        };
 
         if (_goNextPageButton) {
             _goNextPageButton.onclick = function () {
-                showContactsList(_currentPage + 1);
+                _searchCriteria.pageNumber = _currentPage + 1;
+                showContactsList();
             }
         }
         if (_goLastPageButton) {
             _goLastPageButton.onclick = function () {
-                showContactsList(getLastPage());
+                _searchCriteria.pageNumber = getLastPage();
+                showContactsList();
             }
         }
         if (_goPrevPageButton) {
             _goPrevPageButton.onclick = function () {
-                showContactsList(_currentPage - 1);
+                _searchCriteria.pageNumber = _currentPage - 1;
+                showContactsList();
             }
         }
         if (_goFirstPageButton) {
             _goFirstPageButton.onclick = function () {
-                showContactsList(appConstants.PAGE_NUMBER_DEFAULT);
+                _searchCriteria.pageNumber = appConstants.PAGE_NUMBER_DEFAULT;
+                showContactsList();
             }
         }
     }
 
     _callbacks = {
         onAddContact: false,
-        searchContact: false
+        onSearchContact: false
     };
 
     return {
         init: init,
+        render: showContactsList,
         callbacks: _callbacks
     }
-})(App.Constants);
+})(App.Constants, App.Utils);

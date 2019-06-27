@@ -2,6 +2,7 @@
            editProfilePhotoController, searchController) {
     window.onload = function () {
         contactsController.init();
+        contactsController.render();
         contactsController.callbacks.onAddContact = function (contactId) {
             editContactController.init(contactId);
         };
@@ -9,7 +10,7 @@
             searchController.init();
         }
         editContactController.callbacks.onCancel = function () {
-            contactsController.init();
+            contactsController.render();
         }
         editContactController.callbacks.onAddPhone = function (phoneData, settings) {
             editPhoneController.init(phoneData, settings);
@@ -38,6 +39,12 @@
 
         editProfilePhotoController.callbacks.onSavePhoto = function (data) {
             editContactController.updatePhoto(data);
+        }
+        searchController.callbacks.onCancel = function(){
+            contactsController.render();
+        }
+        searchController.callbacks.onSearch = function(data){
+            contactsController.render(data);
         }
     };
 })(App.Constants, App.ContactsController, App.EditContactController, App.EditPhoneController,

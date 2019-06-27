@@ -5,6 +5,7 @@ import model.Phone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
+import utils.SearchCriteria;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -27,12 +28,12 @@ public class PhoneDAO implements DAO<Phone> {
     }
 
     @Override
-    public List<Phone> getPage(int pageNumber, int pageSize) throws ApplicationException {
+    public List<Phone> getPage(SearchCriteria searchCriteria) throws ApplicationException {
         return null;
     }
 
     @Override
-    public int getCount() throws ApplicationException {
+    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
         return 0;
     }
 

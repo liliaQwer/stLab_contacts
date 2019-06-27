@@ -2,7 +2,8 @@ App.SearchController = (function(appConstants){
     var _containerElement,
         _mustacheTemplate,
         _searchForm,
-        _submitButton,
+        _submitSearchFormButton,
+        _cancelButton,
         _nameElement,
         _surnameElement,
         _patronymicElement,
@@ -17,7 +18,8 @@ App.SearchController = (function(appConstants){
         _streetElement,
         _postalCodeElement,
 
-        _lookupsData;
+        _lookupsData,
+        _contactData;
 
     function init(){
         _containerElement = document.getElementById("mainContainer");
@@ -49,14 +51,47 @@ App.SearchController = (function(appConstants){
         _postalCodeElement = document.getElementById('postalCode');
 
         _searchForm = document.getElementById("searchForm");
-        _submitButton = document.getElementById("submitButton");
+        _submitSearchFormButton = document.getElementById("submitSearchFormButton");
+        _cancelButton = document.getElementById("cancelButton");
+
         _searchForm.onsubmit = function(e){
             e.preventDefault();
+
+            _contactData = {
+                pageSize: appConstants.PAGE_SIZE_DEFAULT,
+                pageNumber: appConstants.PAGE_NUMBER_DEFAULT,
+                name: _nameElement.value,
+                surname: _surnameElement.value,
+                patronymic: _patronymicElement.value,
+                birthday: _birthdayElement.value,
+                gender: _genderElement.value,
+                maritalStatus: _marital_statusElement.value,
+                nationality: _nationalityElement.value,
+                country: _countryElement.value,
+                city: _cityElement.value,
+                street: _streetElement.value,
+                postalCode: _postalCodeElement.value
+            }
+
+             if (_callbacks.onSearch && typeof _callbacks.onSearch == 'function'){
+                 _callbacks.onSearch(_contactData);
+             }
+        };
+
+        _cancelButton.onclick = function(){
+            if (_callbacks.onCancel && typeof _callbacks.onCancel == 'function'){
+                _callbacks.onCancel();
+            }
         }
     }
 
+    _callbacks = {
+        onCancel: false,
+        onSearch: false
+    };
 
     return {
-        init: init
+        init: init,
+        callbacks: _callbacks
     }
 }(App.Constants));

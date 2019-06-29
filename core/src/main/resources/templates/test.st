@@ -1,3 +1,1 @@
-test(param) ::= <<
-    This is a template with the following param: (<param>)
->>
+This is a template with the following param: ($param$)

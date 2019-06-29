@@ -1,17 +1,21 @@
 package model;
 
 public class IdDescription {
-    private int id;
+    private Integer id;
     private String description;
 
     public IdDescription() {
     }
+    public IdDescription(Integer id, String description) {
+        this.id = id;
+        this.description = description;
+    }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

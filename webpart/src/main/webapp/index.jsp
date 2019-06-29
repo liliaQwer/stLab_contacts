@@ -17,13 +17,13 @@
 
 <script type="template/mustache" id="contactsListTemplate">
     <h1>Contacts List</h1>
-    <div>
-        {{#searchCriteriaValues}}
-        <span class="searchCriteria">{{.}}</span>
-        {{/searchCriteriaValues}}
+    <div class="marginBottom5">
         {{#hasSearchCriteria}}
         <span class="clearSearch">Clear filter</span>
         {{/hasSearchCriteria}}
+        {{#searchCriteriaValues}}
+        <span class="searchCriteria">{{.}}</span>
+        {{/searchCriteriaValues}}
     </div>
     <div class="controls">
         <div id="pageSizeSelectBlock">
@@ -472,18 +472,53 @@
         </div>
     </form>
 </script>
+<script type="template/mustache" id="sendEmailTemplate">
+    <h1>Send Email</h1>
+    <!--<div class="flex flex-wrap">-->
+    <form id="sendEmailForm">
+        <fieldset class="marginBottom5">
+            <legend>Contact Info</legend>
+                <div>
+                    <div class="form-group">
+                        <label for="to">To</label>
+                        <span id="to">{{#emailList}} {{.}} {{/emailList}}</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input id="subject" type="text" placeholder="Enter subject"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="template">Template:</label>
+                        <select id="template">
+                            <option value="">Select template</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailText">Text:</label>
+                        <textarea id="emailText" type="date" placeholder="Enter email text"></textarea>
+                    </div>
+                </div>
+        </fieldset>
+        <div>
+            <button type="button" class="button" id="cancelButton">Cancel</button>
+            <button type="submit" class="button" id="submitSendEmailFormButton">Send email</button>
+        </div>
+    </form>
+</script>
 
 <script type="text/javascript">
     var App = {};
 </script>
 <script type="text/javascript" src="js/constants.js"></script>
 <script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/lookupRepository.js"></script>
 <script type="text/javascript" src="js/editAttachmentController.js"></script>
 <script type="text/javascript" src="js/editProfilePhotoController.js"></script>
 <script type="text/javascript" src="js/editPhoneController.js"></script>
 <script type="text/javascript" src="js/editContactController.js"></script>
 <script type="text/javascript" src="js/contactsController.js"></script>
 <script type="text/javascript" src="js/searchController.js"></script>
+<script type="text/javascript" src="js/emailController.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>

@@ -21,6 +21,7 @@ App.Constants = {
         contact: "contacts",
         lookups: "lookups",
         profilePhoto: "profilePhotos",
-        attachment: "attachments"
+        attachment: "attachments",
+        email: "email"
     }
 };

@@ -56,7 +56,7 @@ th {
 .searchCriteria {
     background-color: #c4cbd3;
     padding: 5px;
-    color: #ebeaf3;
+    color: #fefefe;
     border-radius: 5px;
 }
 
@@ -84,7 +84,7 @@ th {
     font-size: 16px;
 }
 
-.button:not(.disabledPaging):hover {
+.button:not(.disabledPaging):hover ,.modal .footer label:hover{
     background-color: #aec6ef;
     cursor: pointer;
 }

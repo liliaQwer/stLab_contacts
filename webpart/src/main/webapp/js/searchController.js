@@ -1,4 +1,4 @@
-App.SearchController = (function(appConstants){
+App.SearchController = (function(appConstants, appLookup){
     var _containerElement,
         _mustacheTemplate,
         _searchForm,
@@ -25,9 +25,7 @@ App.SearchController = (function(appConstants){
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("searchTemplate").innerHTML;
 
-        fetch(appConstants.URL.lookups).then(function (response) {
-            return response.json();
-        }).then(function (data) {
+        appLookup.getLookups().then(function (data) {
             _lookupsData = data;
             render();
         });
@@ -94,4 +92,4 @@ App.SearchController = (function(appConstants){
         init: init,
         callbacks: _callbacks
     }
-}(App.Constants));
+}(App.Constants, App.LookupRepository));

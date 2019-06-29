@@ -16,16 +16,18 @@ public class EmailTemplate {
         //hello.add("name", "World");
         //System.out.println(hello.render());
         System.out.println("Before template");
-        URL wrong = Thread.currentThread().getContextClassLoader().getResource("templates");
+        URL wrong =EmailTemplate.class.getClassLoader().getResource("templates");
+        System.out.println(wrong);
+        //URL wrong = Thread.currentThread().getContextClassLoader().getResource("templates");
         URL correct = new URL(wrong.toString().replaceAll("/$", ""));
-
+        System.out.println(correct);
         STRawGroupDir stGroupDir = new STRawGroupDir(correct, null, '$', '$');
         //STGroup stGroupDir = new STGroupDir("templates",'$','$');
         System.out.println(stGroupDir.getRootDirURL());
         //STGroupDir.verbose = true;
-        ST st = stGroupDir.getInstanceOf("/test");
+        ST st = stGroupDir.getInstanceOf("test");
         System.out.println("ST:" + st);
-        st.add("param", "World");
+        st.add("param", "Лиля");
         System.out.println("template: " + st.render());
         return "**********";
     }

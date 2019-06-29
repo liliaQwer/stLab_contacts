@@ -1,4 +1,4 @@
-App.EditContactController = (function (appConstants, utils) {
+App.EditContactController = (function (appConstants, utils, appLookup) {
     var _messageErrorElement,
         _containerElement,
         _mustacheTemplate,
@@ -77,7 +77,7 @@ App.EditContactController = (function (appConstants, utils) {
                 updatedIds: []
             }
         };
-        loadLookups()
+        appLookup.getLookups()
             .then(function (data) {
                 _lookupsData = data;
                 if (contactId) {
@@ -109,12 +109,6 @@ App.EditContactController = (function (appConstants, utils) {
         }, _contactData, _lookupsData));
         _containerElement.innerHTML = rendered;
         assignEvents();
-    }
-
-    function loadLookups() {
-        return fetch(appConstants.URL.lookups).then(function (response) {
-            return response.json();
-        });
     }
 
     function loadContactInfo(contactId) {
@@ -544,4 +538,4 @@ App.EditContactController = (function (appConstants, utils) {
         updatePhoto: updatePhoto,
         callbacks: _callbacks
     }
-})(App.Constants, App.Utils);
+})(App.Constants, App.Utils, App.LookupRepository);

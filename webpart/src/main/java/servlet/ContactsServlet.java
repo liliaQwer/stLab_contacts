@@ -30,9 +30,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.stream;
-
-
 @WebServlet(urlPatterns = {"/contacts/*"})
 public class ContactsServlet extends HttpServlet {
     private static final int THRESHOLD_SIZE = 1024 * 1024 * 3;  // 3MB
@@ -165,14 +162,6 @@ public class ContactsServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
         }
-        //EmailTemplate.getTemplates();
-
-
-//        try {
-//            new EmailTemplate().sendEmail();
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private SearchCriteria parseRequestParams(HttpServletRequest request) throws IllegalAccessException, ParseException {

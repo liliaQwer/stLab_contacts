@@ -1,55 +1,32 @@
 package dao;
 
-import model.Attachment;
 import model.Phone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
 import utils.SearchCriteria;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PhoneDAO implements DAO<Phone> {
-    private DataSource dataSource;
     private final static Logger logger = LogManager.getLogger(PhoneDAO.class);
 
-    public PhoneDAO(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public PhoneDAO() {
+
     }
 
     @Override
-    public Phone get(int id) throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public List<Phone> getPage(SearchCriteria searchCriteria) throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
-        return 0;
-    }
-
-    @Override
-    public List<Phone> getList() throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public List<Phone> getList(int param) throws ApplicationException {
+    public List<Phone> getList(Connection connection, int param) throws SQLException {
         List<Phone> phoneList = new ArrayList<>();
         String query = "select * from phone where contact_id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)){
+        try (PreparedStatement st = connection.prepareStatement(query)){
             st.setInt(1, param);
-            logger.info(st.toString());
+            //ogger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
                 Phone phone = new Phone();
@@ -62,18 +39,17 @@ public class PhoneDAO implements DAO<Phone> {
                 phone.setComment(rs.getString("comment"));
                 phoneList.add(phone);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
         return phoneList;
     }
 
     @Override
-    public int edit(Phone o) throws ApplicationException {
+    public int edit(Connection connection, Phone o) throws SQLException {
         String insertQuery = "update phone set id=?, country_code=?, oper_code=?, number=?, type=?, comment=? where contact_id=?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(insertQuery)){
+        try (PreparedStatement st = connection.prepareStatement(insertQuery)){
             st.setInt(1, o.getId());
             st.setInt(2, o.getCountryCode());
             st.setInt(3, o.getOperatorCode());
@@ -83,31 +59,29 @@ public class PhoneDAO implements DAO<Phone> {
             st.setInt(7, o.getContactId());
             logger.info(st.toString());
             return st.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int delete(int id) throws ApplicationException {
+    public int delete(Connection connection, int id) throws SQLException {
         String query = "delete from phone where id =?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)){
+        try (PreparedStatement st = connection.prepareStatement(query)){
             st.setInt(1, id);
             logger.info(st.toString());
             return st.executeUpdate();
         } catch (Exception e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int save(Phone o) throws ApplicationException {
+    public int save(Connection connection, Phone o) throws SQLException {
         String insertQuery = "INSERT INTO phone (contact_id, country_code, oper_code, number, type, comment) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(insertQuery)){
+        try (PreparedStatement st = connection.prepareStatement(insertQuery)){
             st.setInt(1, o.getContactId());
             st.setInt(2, o.getCountryCode());
             st.setInt(3, o.getOperatorCode());
@@ -116,10 +90,30 @@ public class PhoneDAO implements DAO<Phone> {
             st.setString(6, getStringOrNull(o.getComment()));
             logger.info(st.toString());
             return st.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
+    }
+
+    @Override
+    public Phone get(Connection connection, int id){
+        return null;
+    }
+
+    @Override
+    public List<Phone> getPage(Connection connection, SearchCriteria searchCriteria){
+        return null;
+    }
+
+    @Override
+    public int getCount(Connection connection, SearchCriteria searchCriteria){
+        return 0;
+    }
+
+    @Override
+    public List<Phone> getList(Connection connection){
+        return null;
     }
 
 }

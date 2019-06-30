@@ -1,6 +1,9 @@
 package email;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.stringtemplate.v4.*;
+import utils.ApplicationException;
 import view.ContactEmail;
 
 import javax.mail.*;
@@ -21,24 +24,26 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 public class EmailTemplateHelper {
+    private final static Logger logger = LogManager.getLogger(EmailTemplateHelper.class);
     private static Properties smtpProps;
     static{
         try (InputStream input = EmailTemplateHelper.class.getClassLoader().getResourceAsStream("mail.properties")) {
             smtpProps = new Properties();
             smtpProps.load(input);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
         }
     }
 
-    public static ArrayList<TemplateType> getAllTemplates() throws MalformedURLException {
+    public static ArrayList<TemplateType> getAllTemplates() throws ApplicationException {
         URL urlSlash = EmailTemplateHelper.class.getClassLoader().getResource("templates");
         //URL wrong = Thread.currentThread().getContextClassLoader().getResource("templates");
-        URL templateUrl = new URL(urlSlash.toString().replaceAll("/$", ""));
-        STRawGroupDir stGroupDir = new STRawGroupDir(templateUrl, null, '$', '$');
-        ArrayList<TemplateType> templateList = new ArrayList<>();
         FileSystem fileSystem = null;
+        ArrayList<TemplateType> templateList = new ArrayList<>();
         try {
+            URL templateUrl = new URL(urlSlash.toString().replaceAll("/$", ""));
+            STRawGroupDir stGroupDir = new STRawGroupDir(templateUrl, null, '$', '$');
+
             URI uri = templateUrl.toURI();
             Path myPath;
             if (uri.getScheme().equals("jar")) {
@@ -66,25 +71,31 @@ public class EmailTemplateHelper {
                 try {
                     fileSystem.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
                 }
             }
-            e.printStackTrace();
+            logger.error(e);
+            throw new ApplicationException();
         }
         return templateList;
     }
 
-    public static String getTemplate(String templateName, String name) throws MalformedURLException {
+    public static String getTemplate(String templateName, String name) throws ApplicationException {
         URL urlSlash = EmailTemplateHelper.class.getClassLoader().getResource("templates");
         //URL wrong = Thread.currentThread().getContextClassLoader().getResource("templates");
-        URL templateUrl = new URL(urlSlash.toString().replaceAll("/$", ""));
+        URL templateUrl = null;
+        try {
+            templateUrl = new URL(urlSlash.toString().replaceAll("/$", ""));
+        } catch (MalformedURLException e) {
+           logger.error(e);
+           throw new ApplicationException();
+        }
         STRawGroupDir stGroupDir = new STRawGroupDir(templateUrl, null, '$', '$');
         ST st = stGroupDir.getInstanceOf(templateName);
         st.add("name", name);
         return st.render();
     }
 
-    public static void sendEmail(ArrayList<ContactEmail> emails, String template, String text, String subject) throws MessagingException, MalformedURLException {
+    public static void sendEmail(ArrayList<ContactEmail> emails, String template, String text, String subject) throws MessagingException, ApplicationException {
         Session session = Session.getDefaultInstance(smtpProps,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
@@ -97,14 +108,15 @@ public class EmailTemplateHelper {
             String emailText = null;
             if (template != null && !template.isEmpty()){
                 emailText = EmailTemplateHelper.getTemplate(template, contactEmail.getContactName());
-                System.out.println(emailText);
+            }else{
+                emailText = text;
             }
+            System.out.println("emailText" + emailText);
             MimeMessage message = new MimeMessage(session);
-           // message.setFrom(new InternetAddress(smtpProps.getProperty("mail.username")));"liliaqwer@gmail.com"
-            message.setFrom(new InternetAddress("liliaqwer@gmail.com"));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress("andrew.qwer87@gmail.com"));//email
+            message.setFrom(new InternetAddress(smtpProps.getProperty("mail.username")));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(contactEmail.getEmail()));
             message.setSubject(subject);
-            message.setText(emailText != null ? emailText : text);
+            message.setText(emailText, "UTF-8");
             Transport.send(message);
         }
     }

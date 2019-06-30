@@ -1,6 +1,8 @@
 package job;
 
 import email.EmailTemplateHelper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -11,11 +13,12 @@ import view.ContactEmail;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MailSendingJob implements Job {
+    private final static Logger logger = LogManager.getLogger(MailSendingJob.class);
+
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext jobExecutionContext){
         System.out.println("I do my job");
         JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
         DataSource dataSource = (DataSource)data.get("dataSource");
@@ -25,10 +28,9 @@ public class MailSendingJob implements Job {
             emailList = (ArrayList<ContactEmail>)contactService.getTodayBirthdayContactsEmails();
             EmailTemplateHelper.sendEmail(emailList, "Birthday", "","Congrats");
         } catch (Exception e) {
+            logger.error(e);
             e.printStackTrace();
             return;
         }
-        System.err.println("---" + jobExecutionContext.getJobDetail().getKey()
-                + " executing.[" + new Date() + "]");
     }
 }

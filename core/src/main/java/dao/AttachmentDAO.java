@@ -6,50 +6,23 @@ import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
 import utils.SearchCriteria;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Types;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AttachmentDAO implements DAO<Attachment> {
-    private DataSource dataSource;
     private final static Logger logger = LogManager.getLogger(AttachmentDAO.class);
 
-    public AttachmentDAO(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public AttachmentDAO(){
     }
 
     @Override
-    public Attachment get(int id) throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public List<Attachment> getPage(SearchCriteria searchCriteria) throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
-        return 0;
-    }
-
-    @Override
-    public List<Attachment> getList() throws ApplicationException {
-        return null;
-    }
-
-    @Override
-    public List<Attachment> getList(int param) throws ApplicationException {
+    public List<Attachment> getList(Connection connection, int param) throws SQLException {
         List<Attachment> attachmentList = new ArrayList<>();
         String query = "select * from attachment where contact_id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)){
+        try (PreparedStatement st = connection.prepareStatement(query)){
             st.setInt(1, param);
-            logger.info(st.toString());
+            //logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while(rs.next()){
                 Attachment attachment = new Attachment();
@@ -60,18 +33,17 @@ public class AttachmentDAO implements DAO<Attachment> {
                 attachment.setUploadDate(rs.getDate("upload_date").toLocalDate());
                 attachmentList.add(attachment);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
         return attachmentList;
     }
 
     @Override
-    public int edit(Attachment o) throws ApplicationException {
+    public int edit(Connection connection, Attachment o) throws SQLException {
         String updateQuery = "UPDATE attachment set file_name = ?, comment = ?, upload_date = ? where id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(updateQuery)){
+        try (PreparedStatement st = connection.prepareStatement(updateQuery)){
             st.setString(1, o.getFileName());
             st.setString(2, getStringOrNull(o.getComment()));
             System.out.println("upload in edit DAO " + o.getUploadDate());
@@ -79,40 +51,58 @@ public class AttachmentDAO implements DAO<Attachment> {
             st.setInt(4, o.getId());
             logger.info(st.toString());
             return st.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int delete(int id) throws ApplicationException {
+    public int delete(Connection connection, int id) throws SQLException {
         String query = "delete from attachment where id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)){
+        try (PreparedStatement st = connection.prepareStatement(query)){
             st.setInt(1, id);
             logger.info(st.toString());
             return st.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int save(Attachment o) throws ApplicationException {
+    public int save(Connection connection, Attachment o) throws SQLException {
         String insertQuery = "INSERT INTO attachment (contact_id, file_name, comment, upload_date) VALUES (?, ?, ?, CURDATE())";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(insertQuery)){
+        try (PreparedStatement st = connection.prepareStatement(insertQuery)){
             st.setInt(1, o.getContactId());
             st.setString(2, o.getFileName());
             st.setString(3, o.getComment());
             logger.info(st.toString());
             return st.executeUpdate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
+
+    @Override
+    public Attachment get(Connection connection, int id){
+        return null;
+    }
+
+    @Override
+    public List<Attachment> getPage(Connection connection, SearchCriteria searchCriteria){
+        return null;
+    }
+
+    @Override
+    public int getCount(Connection connection, SearchCriteria searchCriteria){
+        return 0;
+    }
+
+    @Override
+    public List<Attachment> getList(Connection connection){
+        return null;
+    }
 }

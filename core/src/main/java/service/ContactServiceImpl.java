@@ -2,173 +2,302 @@ package service;
 
 import dao.*;
 import model.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
 import utils.SearchCriteria;
 import view.*;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactServiceImpl implements ContactService{
+public class ContactServiceImpl implements ContactService {
+    private final static Logger logger = LogManager.getLogger(ContactServiceImpl.class);
+    private DataSource dataSource;
     private DAO contactDAO;
     private DAO addressDAO;
     private DAO attachmentDAO;
     private DAO phoneDAO;
 
-    public ContactServiceImpl(DataSource dataSource){
-        this.contactDAO = new ContactDAO(dataSource);
-        this.addressDAO = new AddressDAO(dataSource);
-        this.attachmentDAO = new AttachmentDAO(dataSource);
-        this.phoneDAO = new PhoneDAO(dataSource);
+    public ContactServiceImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+        this.contactDAO = new ContactDAO();
+        this.addressDAO = new AddressDAO();
+        this.attachmentDAO = new AttachmentDAO();
+        this.phoneDAO = new PhoneDAO();
     }
 
     @Override
     public ContactFull get(int id) throws ApplicationException {
-        ContactFull contactFull = new ContactFull((Contact) contactDAO.get(id));
-        contactFull.setAddress((Address) addressDAO.get(id));
-        contactFull.setAttachmentsList(attachmentDAO.getList(id));
-        contactFull.setPhonesList(phoneDAO.getList(id));
+        Connection connection = null;
+        ContactFull contactFull = null;
+        try {
+            connection = dataSource.getConnection();
+            contactFull = new ContactFull((Contact) contactDAO.get(connection, id));
+            contactFull.setAddress((Address) addressDAO.get(connection, id));
+            contactFull.setAttachmentsList(attachmentDAO.getList(connection, id));
+            contactFull.setPhonesList(phoneDAO.getList(connection, id));
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+
+                }
+            }
+            throw new ApplicationException();
+        }
         return contactFull;
     }
 
     @Override
     public List<ContactFull> getPage(SearchCriteria searchCriteria) throws ApplicationException {
-        List<Contact> contactList = contactDAO.getPage(searchCriteria);
-        List<ContactFull> contactFullList = new ArrayList<>();
-        for (Contact contact : contactList) {
-            ContactFull contactFull = new ContactFull(contact);
-            contactFull.setAddress((Address)addressDAO.get(contact.getId()));
-            contactFullList.add(contactFull);
+        Connection connection = null;
+        List<ContactFull> contactFullList = null;
+        try {
+            connection = dataSource.getConnection();
+            List<Contact> contactList = contactDAO.getPage(connection, searchCriteria);
+            contactFullList = new ArrayList<>();
+            for (Contact contact : contactList) {
+                ContactFull contactFull = new ContactFull(contact);
+                contactFull.setAddress((Address) addressDAO.get(connection, contact.getId()));
+                contactFullList.add(contactFull);
+            }
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
         }
         return contactFullList;
     }
 
     @Override
     public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
-        return contactDAO.getCount(searchCriteria);
+        Connection connection = null;
+        int result = 0;
+        try {
+            connection = dataSource.getConnection();
+            result = contactDAO.getCount(connection, searchCriteria);
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
+        }
+        return result;
     }
 
     @Override
     public void edit(ContactView o) throws ApplicationException {
+        Connection connection = null;
         try {
-            contactDAO.edit(o.getContact());
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+            contactDAO.edit(connection, o.getContact());
             o.getAddressInfo().setContactId(o.getId());
-            addressDAO.edit(o.getAddressInfo());
+            addressDAO.edit(connection, o.getAddressInfo());
             PhoneDetails phoneDetails = o.getPhoneInfo();
-            if (phoneDetails.getDeletedIds() != null){
-                for (Integer id: phoneDetails.getDeletedIds()){
-                    phoneDAO.delete(id);
+            if (phoneDetails.getDeletedIds() != null) {
+                for (Integer id : phoneDetails.getDeletedIds()) {
+                    phoneDAO.delete(connection, id);
                 }
             }
-            phoneDetails.getPhonesList().forEach(phone->{
+            for (Phone phone : phoneDetails.getPhonesList()) {
                 phone.setContactId(o.getId());
-                try {
-                    if (phone.getId() > 0) {
-                        phoneDAO.edit(phone);
-                    } else {
-                        phoneDAO.save(phone);
-                    }
-                }catch (ApplicationException e) {
-                    e.printStackTrace();
-                }
-            });
-            AttachmentDetails attachmentDetails= o.getAttachmentsInfo();
-            if (attachmentDetails.getDeletedIds() != null){
-                for (Integer id: attachmentDetails.getDeletedIds()){
-                    attachmentDAO.delete(id);
+                if (phone.getId() > 0) {
+                    phoneDAO.edit(connection, phone);
+                } else {
+                    phoneDAO.save(connection, phone);
                 }
             }
-            attachmentDetails.getAttachmentsList().forEach(attachmentView->{
-                attachmentView.setContactId(o.getId());
-                Attachment attachment;
-                try {
-                    attachment = ViewHelper.prepareAttachment(attachmentView);
-                    if (attachment.getId() > 0) {
-                        attachmentDAO.edit(attachment);
-                    } else {
-                        attachmentDAO.save(attachment);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }catch (ApplicationException e) {
-                    e.printStackTrace();
+            AttachmentDetails attachmentDetails = o.getAttachmentsInfo();
+            if (attachmentDetails.getDeletedIds() != null) {
+                for (Integer id : attachmentDetails.getDeletedIds()) {
+                    attachmentDAO.delete(connection, id);
                 }
-            });
+            }
+            for (AttachmentView attachmentView : attachmentDetails.getAttachmentsList()) {
+                attachmentView.setContactId(o.getId());
+                Attachment attachment = ViewHelper.prepareAttachment(attachmentView);
+                if (attachment.getId() > 0) {
+                    attachmentDAO.edit(connection, attachment);
+                } else {
+                    attachmentDAO.save(connection, attachment);
+                }
+            }
+
+            connection.commit();
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
         } catch (ParseException e) {
-            e.printStackTrace();
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            logger.error(e);
             throw new ApplicationException();
         }
     }
 
     @Override
     public void delete(String idListStr) throws ApplicationException {
-        String[] idList = idListStr.split(",");
-        int result = 0;
-        for (String id: idList){
-            result += contactDAO.delete(Integer.parseInt(id));
-        }
-        if (result != idList.length) {
-            throw new ApplicationException("There was an error during deleting records");
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+            String[] idList = idListStr.split(",");
+            int result = 0;
+            for (String id : idList) {
+                result += contactDAO.delete(connection, Integer.parseInt(id));
+            }
+            if (result != idList.length) {
+                throw new ApplicationException("There was an error during deleting records");
+            }
+            connection.commit();
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
         }
     }
 
     @Override
     public void save(ContactView o) throws ApplicationException {
-        int contactId;
+        Connection connection = null;
         try {
-            contactId = contactDAO.save(o.getContact());
-        } catch (ParseException e) {
-            throw new ApplicationException("ParseException");
-        }
-        if (contactId < 1){
-            throw new ApplicationException("Cannot save contact");
-        }
-        if (!o.getAddressInfo().isEmpty()){
-            o.getAddressInfo().setContactId(contactId);
-            addressDAO.save(o.getAddressInfo());
-        }
-        if (!o.getAttachmentsInfo().getAttachmentsList().isEmpty()){
-            for (AttachmentView attachmentView: o.getAttachmentsInfo().getAttachmentsList()){
-                attachmentView.setContactId(contactId);
-                Attachment attachment = null;
-                try {
-                    attachment = ViewHelper.prepareAttachment(attachmentView);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    throw new ApplicationException("ParseException");
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+            int contactId = contactDAO.save(connection, o.getContact());
+
+            if (contactId < 1) {
+                throw new ApplicationException("Cannot save contact");
+            }
+            if (!o.getAddressInfo().isEmpty()) {
+                o.getAddressInfo().setContactId(contactId);
+                addressDAO.save(connection, o.getAddressInfo());
+            }
+            if (!o.getAttachmentsInfo().getAttachmentsList().isEmpty()) {
+                for (AttachmentView attachmentView : o.getAttachmentsInfo().getAttachmentsList()) {
+                    attachmentView.setContactId(contactId);
+                    Attachment attachment = null;
+                    try {
+                        attachment = ViewHelper.prepareAttachment(attachmentView);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        throw new ApplicationException("ParseException");
+                    }
+                    attachmentDAO.save(connection, attachment);
                 }
-                attachmentDAO.save(attachment);
             }
-        }
-        if (!o.getPhoneInfo().getPhonesList().isEmpty()){
-            for (Phone phone: o.getPhoneInfo().getPhonesList()){
-                phone.setContactId(contactId);
-                phoneDAO.save(phone);
+            if (!o.getPhoneInfo().getPhonesList().isEmpty()) {
+                for (Phone phone : o.getPhoneInfo().getPhonesList()) {
+                    phone.setContactId(contactId);
+                    phoneDAO.save(connection, phone);
+                }
             }
+            connection.commit();
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
+        } catch (ParseException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            logger.error(e);
+            throw new ApplicationException();
         }
+
     }
 
     @Override
     public List<ContactEmail> getTodayBirthdayContactsEmails() throws ApplicationException {
+        Connection connection = null;
         ArrayList<ContactEmail> emailList = new ArrayList<>();
-        ArrayList<Contact> contactList = (ArrayList<Contact>)contactDAO.getList();
-        contactList.stream().filter(contact -> {
-            LocalDate birthday = contact.getBirthday();
-            LocalDate today = LocalDate.now();
-            if (birthday == null){
+        try {
+            connection = dataSource.getConnection();
+            ArrayList<Contact> contactList = (ArrayList<Contact>) contactDAO.getList(connection);
+            contactList.stream().filter(contact -> {
+                LocalDate birthday = contact.getBirthday();
+                LocalDate today = LocalDate.now();
+                if (birthday == null) {
+                    return false;
+                }
+                if (birthday.getMonth() == today.getMonth() && birthday.getDayOfMonth() == today.getDayOfMonth()) {
+                    return contact.getEmail() != null;
+                }
                 return false;
-            }
-            if (birthday.getMonth() == today.getMonth() && birthday.getDayOfMonth() == today.getDayOfMonth()) {
-                return contact.getEmail() != null;
-            }
-            return false;
-        })
-                .forEach(contact ->
-                        emailList.add(new ContactEmail(contact.getName(), contact.getEmail())));
+            })
+                    .forEach(contact ->
+                            emailList.add(new ContactEmail(contact.getName(), contact.getEmail())));
 
+            connection.close();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ex) {
+                }
+            }
+            throw new ApplicationException();
+        }
         return emailList;
     }
 

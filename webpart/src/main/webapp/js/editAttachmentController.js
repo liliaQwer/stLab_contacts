@@ -71,6 +71,7 @@ App.EditAttachmentController = (function (appConstants, utils) {
             if (_uploadedFile) {
                 attachmentData.uploadedFile = _uploadedFile;
                 attachmentData.fileName = _uploadedFile.name;
+                attachmentData.isNew = true;
             }
 
             if (_callbacks.onSaveAttachment && typeof _callbacks.onSaveAttachment === "function") {

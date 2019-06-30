@@ -18,7 +18,6 @@ import view.EmailTemplates;
 import view.Emails;
 
 import javax.annotation.Resource;
-import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,10 +35,11 @@ import java.util.stream.Collectors;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 @WebServlet(urlPatterns = {"/email"}, loadOnStartup=1)
-public class EmailServlet extends HttpServlet {
+public class EmailServlet extends HttpServlet implements JsonSendable{
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
-    private Scheduler sched;
+    private Scheduler scheduler;
+    private ContactService service;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -89,7 +88,6 @@ public class EmailServlet extends HttpServlet {
         System.out.println("contactIdstr= " + contactsIdStr);
         List<Integer> idList = Arrays.stream(contactsIdStr.split(",")).map(Integer::valueOf).collect(Collectors.toList());
         Emails emails = new Emails();
-        ContactService service = new ContactServiceImpl(dataSource);
         try {
             for(Integer id: idList){
                 String email = service.get(id).getContact().getEmail();
@@ -107,26 +105,12 @@ public class EmailServlet extends HttpServlet {
         }
     }
 
-    public void sendJsonResponse(HttpServletResponse response, Object view)  {
-        try{
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValue(out, view);
-            System.out.println(mapper.writeValueAsString(view));
-            out.flush();
-        }catch (IOException e){
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-
 
     @Override
     public void destroy() {
         super.destroy();
         try {
-            sched.shutdown(true);
+            scheduler.shutdown(true);
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
@@ -135,10 +119,11 @@ public class EmailServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        service = new ContactServiceImpl(dataSource);
         System.out.println("Before doing job");
         SchedulerFactory sf = new StdSchedulerFactory();
         try {
-            sched = sf.getScheduler();
+            scheduler = sf.getScheduler();
             JobDetail job = newJob(MailSendingJob.class)
                     .withIdentity("job", "group1")
                     .build();
@@ -151,9 +136,9 @@ public class EmailServlet extends HttpServlet {
                             .withIntervalInSeconds(24*60*60)
                             .repeatForever())
                     .build();
-            sched.scheduleJob(job, trigger);
-            sched.start();
-            System.out.println("Before sut down");
+            scheduler.scheduleJob(job, trigger);
+            scheduler.start();
+            System.out.println("Before shut down");
         } catch (SchedulerException e) {
             e.printStackTrace();
         }

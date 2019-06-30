@@ -31,14 +31,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @WebServlet(urlPatterns = {"/contacts/*"})
-public class ContactsServlet extends HttpServlet {
+public class ContactsServlet extends HttpServlet implements JsonSendable {
     private static final int THRESHOLD_SIZE = 1024 * 1024 * 3;  // 3MB
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
     private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
-    //private ContactServiceImpl service = new ContactServiceImpl(dataSource);
+    private ContactService service;
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -55,7 +56,6 @@ public class ContactsServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        System.out.println("doPut");
         ContactView contact = null;
         List<FileItem> fileItems = new ArrayList<>();
         try {
@@ -64,7 +64,6 @@ public class ContactsServlet extends HttpServlet {
             // iterates over form's fields
             while (iter.hasNext()) {
                 Object param = iter.next();
-                System.out.println("param = " + param);
                 FileItem item = (FileItem) param;
                 if (!item.isFormField()) {
                     fileItems.add(item);
@@ -74,7 +73,6 @@ public class ContactsServlet extends HttpServlet {
                     contact = mapper.readValue(item.getString("UTF-8"), ContactView.class);
                 }
             }
-            ContactService service = new ContactServiceImpl(dataSource);
             service.edit(contact);
             int contactId = contact.getId();
             FileHelper fileCreator = FileHelper.getInstance();
@@ -112,10 +110,9 @@ public class ContactsServlet extends HttpServlet {
                 } else {
                     System.out.println("value=" + item.getString());
                     ObjectMapper mapper = new ObjectMapper();
-                    contact = mapper.readValue(item.getString(), ContactView.class);
+                    contact = mapper.readValue(item.getString("UTF-8"), ContactView.class);
                 }
             }
-            ContactService service = new ContactServiceImpl(dataSource);
             service.save(contact);
             int contactId = contact.getId();
             FileHelper fileCreator = FileHelper.getInstance();
@@ -151,7 +148,6 @@ public class ContactsServlet extends HttpServlet {
             return;
         }
         ContactsAndSearchCriteria contactsPageView = null;
-        ContactService service = new ContactServiceImpl(dataSource);
         try {
             service.getPage(searchCriteria);
             contactsPageView = ViewHelper.prepareContactsAndPageInfoView(service.getPage(searchCriteria),
@@ -174,20 +170,14 @@ public class ContactsServlet extends HttpServlet {
             if (request.getParameter(param).trim().isEmpty()){
                 continue;
             }
-            System.out.println("*************Param = " + param);
             int fieldIdx = fieldNames.indexOf(param);
-            System.out.println("Idx = " + fieldIdx);
-            System.out.println("fields[fieldIdx].getType() = " + allFields[fieldIdx].getType());
-            System.out.println("request.getParameter(param) = " + request.getParameter(param));
             if (fieldIdx != -1){
                 if (allFields[fieldIdx].getType() == Integer.class){
-                    System.out.println("Int try = ");
                     allFields[fieldIdx].setAccessible(true);
                     allFields[fieldIdx].set(searchCriteria, Integer.parseInt(request.getParameter(param)));
                 }else if (allFields[fieldIdx].getType() == String.class){
                     allFields[fieldIdx].setAccessible(true);
                     allFields[fieldIdx].set(searchCriteria, request.getParameter(param));
-                    System.out.println("in String.class) = " + request.getParameter(param));
                 }else if(allFields[fieldIdx].getType() == LocalDate.class){
                     allFields[fieldIdx].setAccessible(true);
                     allFields[fieldIdx].set(searchCriteria, DateFormatter.parseDate(request.getParameter(param)));
@@ -200,8 +190,6 @@ public class ContactsServlet extends HttpServlet {
     }
 
     private void getContact(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ContactServiceImpl service = new ContactServiceImpl(dataSource);
-        System.out.println("getContact " + request.getPathInfo());
         try {
             ContactFull contact = service.get(getIdFromPath(request));
             ContactView view = ViewHelper.prepareContactView(contact);
@@ -219,30 +207,11 @@ public class ContactsServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        ContactServiceImpl service = new ContactServiceImpl(dataSource);
-        System.out.println("doDelete");
         try {
             service.delete(getIdStrFromPath(request));
         } catch (ApplicationException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
-        }
-        //System.out.println("gotView");
-        //sendJsonResponse(response, viewList);
-    }
-
-    public void sendJsonResponse(HttpServletResponse response, Object view) {
-        try {
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValue(out, view);
-            System.out.println(mapper.writeValueAsString(view));
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -266,6 +235,11 @@ public class ContactsServlet extends HttpServlet {
         return idPath.substring(1);
     }
 
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        service = new ContactServiceImpl(dataSource);
+    }
 }
     /*
     try {

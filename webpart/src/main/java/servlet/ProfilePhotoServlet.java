@@ -15,8 +15,9 @@ public class ProfilePhotoServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String requestedFile = req.getPathInfo();
-        System.out.println("requestedFile=" + requestedFile);
-        if (requestedFile != null)requestedFile = requestedFile.replaceAll("/","\\\\");
+        if (requestedFile != null){
+            requestedFile = requestedFile.replaceAll("/","\\\\");
+        }
         System.out.println("requestedFile2=" + requestedFile);
         OutputStream out = resp.getOutputStream();
         FileHelper fileHelper = FileHelper.getInstance();

@@ -11,7 +11,8 @@ App.SearchController = (function(appConstants, appLookup){
         _genderElement,
         _marital_statusElement,
         _nationalityElement,
-
+        _callbacks,
+        
         /* address info elements */
         _countryElement,
         _cityElement,

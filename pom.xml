@@ -21,13 +21,15 @@
         <com.fasterxml.jackson>2.9.6</com.fasterxml.jackson>
         <quartz-scheduler>2.3.0</quartz-scheduler>
         <slf4j-api>1.7.7</slf4j-api>
+        <commons-lang3>3.9</commons-lang3>
+        <mysql-connector-java>8.0.13</mysql-connector-java>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.13</version>
+            <version>${mysql-connector-java}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
         <dependency>
@@ -64,7 +66,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3}</version>
+        </dependency>
     </dependencies>
 
 </project>

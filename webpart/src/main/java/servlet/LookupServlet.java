@@ -18,14 +18,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 @WebServlet(urlPatterns = {"/lookups"})
-public class LookupServlet extends HttpServlet {
+public class LookupServlet extends HttpServlet implements JsonSendable{
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
+    private LookupService service;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        LookupService service = new LookupServiceImpl(dataSource);
         LookupsView lookupsView = null;
         try {
             lookupsView = ViewHelper.prepareLookupsView(service.getGenderList(),
@@ -37,17 +37,9 @@ public class LookupServlet extends HttpServlet {
         }
     }
 
-    public void sendJsonResponse(HttpServletResponse response, Object view)  {
-        try{
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.writeValue(out, view);
-            System.out.println(mapper.writeValueAsString(view));
-            out.flush();
-        }catch (IOException e){
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        service = new LookupServiceImpl(dataSource);
     }
 }

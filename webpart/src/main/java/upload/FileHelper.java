@@ -1,12 +1,15 @@
 package upload;
 
 import org.apache.commons.fileupload.FileItem;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Properties;
 
 public class FileHelper {
+
+    private final static Logger logger = LogManager.getLogger(FileHelper.class);
     private static String attachmentLocation;
     private static String profilePhotoLocation;
     private static String defaultProfile;
@@ -40,7 +43,7 @@ public class FileHelper {
             System.out.println("attaLoc=" + attachmentLocation);
             System.out.println("profLoc=" + profilePhotoLocation);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.error(ex);
         }
     }
     public static boolean upload(FileItem item, int contactId){
@@ -67,7 +70,7 @@ public class FileHelper {
         try {
             item.write(storeFile);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
             return false;
         }
         return true;
@@ -85,7 +88,7 @@ public class FileHelper {
                 out.write(buffer, 0, length);
             }
         }catch(IOException e){
-            e.printStackTrace();
+            logger.error(e);
             throw e;
         }
 

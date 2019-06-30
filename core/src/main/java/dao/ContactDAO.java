@@ -5,13 +5,11 @@ import org.apache.logging.log4j.LogManager;
 import utils.ApplicationException;
 import utils.ContactStatus;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import utils.SearchCriteria;
@@ -22,17 +20,16 @@ interface Consumer<X, Y, Z> {
 }
 
 class MapData {
-    public MapData(Object value, Consumer<PreparedStatement, Integer, Object> consumer) {
+    MapData(Object value, Consumer<PreparedStatement, Integer, Object> consumer) {
         this.value = value;
         this.consumer = consumer;
     }
 
-    public Object value;
-    public Consumer<PreparedStatement, Integer, Object> consumer;
+    Object value;
+    Consumer<PreparedStatement, Integer, Object> consumer;
 }
 
 public class ContactDAO implements DAO<Contact> {
-    private DataSource dataSource;
     private final static Logger logger = LogManager.getRootLogger();
     private static Map<String, String> fieldsDictionary;
 
@@ -51,20 +48,19 @@ public class ContactDAO implements DAO<Contact> {
         fieldsDictionary.put("nationality", "nationality");
     }
 
-    public ContactDAO(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public ContactDAO() {
+
     }
 
     @Override
-    public Contact get(int id) throws ApplicationException {
+    public Contact get(Connection connection, int id) throws SQLException {
         String query = "select * from contact where id = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)) {
+        try (PreparedStatement st = connection.prepareStatement(query)) {
             st.setInt(1, id);
-            logger.info(st.toString());
+            //logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             if (!rs.next()) {
-                throw new ApplicationException();
+                return null;
             }
             Contact contact = new Contact();
             contact.setId(rs.getInt("id"));
@@ -80,29 +76,19 @@ public class ContactDAO implements DAO<Contact> {
             contact.setNationality(rs.getString("nationality"));
             contact.setProfilePhoto(rs.getString("profile_photo"));
             return contact;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public List<Contact> getPage(SearchCriteria searchCriteria) throws ApplicationException {
+    public List<Contact> getPage(Connection connection, SearchCriteria searchCriteria) throws SQLException {
         List<Contact> contactList = new ArrayList<>();
         String query = "select * from contact c left join address a on c.id=a.contact_id  where ";
-        Connection connection = null;
         PreparedStatement st = null;
-
-        try {
-            connection = dataSource.getConnection();
+        try{
             st = prepareSelectQueryAndStatemant(query, searchCriteria, connection, false);
-                /*
-             PreparedStatement st = connection.prepareStatement(query)) {
-            st.setString(1, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
-            st.setInt(2, pageSize * (pageNumber - 1));
-            st.setInt(3, pageSize);
-
-                 */
             logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
@@ -116,32 +102,23 @@ public class ContactDAO implements DAO<Contact> {
                 contactList.add(contact);
             }
             st.close();
-            connection.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (st != null){
                 try {
                     st.close();
                 } catch (SQLException ex) {
                 }
             }
-            if (connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
-            }
             logger.error(e);
-            e.printStackTrace();
-            throw new ApplicationException();
+            throw e;
         }
-        return contactList == null ? Collections.emptyList() : contactList;
+        return contactList;
     }
 
     private PreparedStatement prepareSelectQueryAndStatemant(String query, SearchCriteria searchCriteria, Connection con,
-                                                             boolean isTotalCountQuery) throws SQLException, IllegalAccessException {
+                                                             boolean isTotalCountQuery) throws SQLException {
         StringBuilder sbQuery = new StringBuilder(query);//"select * from contact where active_status = ? limit ?,?"
         Field[] allFields = SearchCriteria.class.getDeclaredFields();
-        // List<String> fieldNames = Arrays.stream(allFields).map(field->field.getName()).collect(Collectors.toList());
         AtomicInteger index = new AtomicInteger();
         Map<Integer, MapData> mapData = new HashMap<>();
         Arrays.stream(allFields).filter(field -> {
@@ -195,51 +172,38 @@ public class ContactDAO implements DAO<Contact> {
         return st;
     }
 
-
-
     @Override
-    public int getCount(SearchCriteria searchCriteria) throws ApplicationException {
+    public int getCount(Connection connection, SearchCriteria searchCriteria) throws SQLException {
         String query = "select count(*) amount from contact c left join address a on c.id=a.contact_id  where ";
-        Connection connection = null;
         PreparedStatement st = null;
         try {
-            connection = dataSource.getConnection();
             st = prepareSelectQueryAndStatemant(query, searchCriteria, connection, true);
-
             logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             rs.next();
             int result = rs.getInt("amount");
             st.close();
-            connection.close();
             return result;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             if (st != null){
                 try {
                     st.close();
                 } catch (SQLException ex) {
                 }
             }
-            if (connection != null){
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                }
-            }
             logger.error(e);
-            e.printStackTrace();
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public List<Contact> getList() throws ApplicationException {
+    public List<Contact> getList(Connection connection) throws SQLException {
         ArrayList<Contact> contactList = new ArrayList<>();
         String query = "select * from contact where active_status = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)) {
+        try {
+            PreparedStatement st = connection.prepareStatement(query);
             st.setString(1, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
-            logger.info(st.toString());
+            //logger.info(st.toString());
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
                 Contact contact = new Contact();
@@ -257,25 +221,25 @@ public class ContactDAO implements DAO<Contact> {
                 contact.setProfilePhoto(rs.getString("profile_photo"));
                 contactList.add(contact);
             }
+            st.close();
             return contactList;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public List<Contact> getList(int param) throws ApplicationException {
+    public List<Contact> getList(Connection connection, int param){
         return null;
     }
 
     @Override
-    public int edit(Contact o) throws ApplicationException {
+    public int edit(Connection connection, Contact o) throws SQLException {
         String updateQuery = "UPDATE contact SET name = ?, patronymic = ?, surname = ?, birthday = ?, company = ?, " +
                 "nationality = ?, marital_status_id = ?, site = ?, email = ?, gender_id = ?, profile_photo = ? WHERE (id = ?)";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement insertSt = connection.prepareStatement(updateQuery)
-        ) {
+        try {
+            PreparedStatement insertSt = connection.prepareStatement(updateQuery);
             insertSt.setString(1, o.getName());
             insertSt.setString(2, getStringOrNull(o.getPatronymic()));
             insertSt.setString(3, o.getSurname());
@@ -289,42 +253,42 @@ public class ContactDAO implements DAO<Contact> {
             insertSt.setString(11, getStringOrNull(o.getProfilePhoto()));
             insertSt.setInt(12, o.getId());
             logger.info(insertSt.toString());
+            insertSt.close();
             return insertSt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int delete(int id) throws ApplicationException {
+    public int delete(Connection connection, int id) throws SQLException {
         String query = "update contact set active_status = ? where id = ?";
-        int result = 0;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement st = connection.prepareStatement(query)) {
+        int result;
+        try {
+            PreparedStatement st = connection.prepareStatement(query);
             st.setString(1, String.valueOf(ContactStatus.DEACTIVATED.getStatus()));
             st.setInt(2, id);
             logger.info(st.toString());
             result = st.executeUpdate();
             System.out.println("result " + result);
+            st.close();
             return result;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
 
     @Override
-    public int save(Contact o) throws ApplicationException {
+    public int save(Connection connection, Contact o) throws SQLException {
         String insertQuery = "insert into contact(name, patronymic, surname, birthday, company, nationality, marital_status_id," +
                 " email, gender_id, site, profile_photo, active_status) values(?,?,?,?,?,?,?,?,?,?,?,?)";
         String lastIdQuery = "SELECT last_insert_id()";
         int result;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement insertSt = connection.prepareStatement(insertQuery);
-             PreparedStatement lastIdSt = connection.prepareStatement(lastIdQuery)
-        ) {
+        try {
+            PreparedStatement insertSt = connection.prepareStatement(insertQuery);
+            PreparedStatement lastIdSt = connection.prepareStatement(lastIdQuery);
             insertSt.setString(1, o.getName());
             insertSt.setString(2, getStringOrNull(o.getPatronymic()));
             insertSt.setString(3, o.getSurname());
@@ -345,13 +309,12 @@ public class ContactDAO implements DAO<Contact> {
                     result = rs.getInt(1);
                 }
             }
-            System.out.println("result " + result);
+            insertSt.close();
+            lastIdSt.close();
             return result;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
             logger.error(e);
-            throw new ApplicationException();
+            throw e;
         }
     }
-
 }

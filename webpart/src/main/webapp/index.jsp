@@ -481,7 +481,7 @@
                 <div>
                     <div class="form-group">
                         <label for="to">To</label>
-                        <span id="to">{{#emailList}} {{.}} {{/emailList}}</span>
+                        <span id="to">{{#emailList}} {{email}} {{/emailList}}</span>
                     </div>
                     <div class="form-group">
                         <label for="subject">Subject:</label>
@@ -491,11 +491,14 @@
                         <label for="template">Template:</label>
                         <select id="template">
                             <option value="">Select template</option>
+                            {{#templateList}}
+                            <option value="{{name}}">{{name}}</option>
+                            {{/templateList}}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="emailText">Text:</label>
-                        <textarea id="emailText" type="date" placeholder="Enter email text"></textarea>
+                        <label for="text">Text:</label>
+                        <textarea rows="5" cols="30" id="text" type="date" placeholder="Enter email text"></textarea>
                     </div>
                 </div>
         </fieldset>

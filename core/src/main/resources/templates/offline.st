@@ -1,3 +1,1 @@
-test(param) ::= <<
-    Our server will be offline this weekend: (<param>)
->>
+Dear, $name$! Our server will be offline this weekend.

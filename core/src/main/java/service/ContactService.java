@@ -3,6 +3,7 @@ package service;
 import model.ContactFull;
 import utils.ApplicationException;
 import utils.SearchCriteria;
+import view.ContactEmail;
 import view.ContactView;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface ContactService {
     void edit(ContactView o) throws ApplicationException;
     void delete(String idListStr) throws ApplicationException;
     void save(ContactView o) throws ApplicationException;
+    List<ContactEmail> getTodayBirthdayContactsEmails() throws ApplicationException;
 }

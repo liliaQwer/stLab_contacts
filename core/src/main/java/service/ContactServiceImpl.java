@@ -8,6 +8,7 @@ import view.*;
 
 import javax.sql.DataSource;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +149,27 @@ public class ContactServiceImpl implements ContactService{
                 phoneDAO.save(phone);
             }
         }
+    }
+
+    @Override
+    public List<ContactEmail> getTodayBirthdayContactsEmails() throws ApplicationException {
+        ArrayList<ContactEmail> emailList = new ArrayList<>();
+        ArrayList<Contact> contactList = (ArrayList<Contact>)contactDAO.getList();
+        contactList.stream().filter(contact -> {
+            LocalDate birthday = contact.getBirthday();
+            LocalDate today = LocalDate.now();
+            if (birthday == null){
+                return false;
+            }
+            if (birthday.getMonth() == today.getMonth() && birthday.getDayOfMonth() == today.getDayOfMonth()) {
+                return contact.getEmail() != null;
+            }
+            return false;
+        })
+                .forEach(contact ->
+                        emailList.add(new ContactEmail(contact.getName(), contact.getEmail())));
+
+        return emailList;
     }
 
 }

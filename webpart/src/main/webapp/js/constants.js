@@ -15,7 +15,8 @@ App.Constants = {
         SELECT_SINGLE_PHONE_WARNING: "You should check only 1 phone for editing!",
         SELECT_SINGLE_ATTACHMENT_WARNING: "You should check only 1 attachment for editing!",
         FULL_PHONE_LENGTH_INVALID: "Full phone number should be 15 digits or shorter",
-        INVALID_PROFILE_PHOTO_FILE: "Only images are allowed for a profile photo"
+        INVALID_PROFILE_PHOTO_FILE: "Only images are allowed for a profile photo",
+        SUCCESS_EMAIL_SENDING: "Emails were successfully sent"
     },
     URL: {
         contact: "contacts",

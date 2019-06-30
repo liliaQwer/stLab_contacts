@@ -19,6 +19,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logging.log4j>2.11.1</logging.log4j>
         <com.fasterxml.jackson>2.9.6</com.fasterxml.jackson>
+        <quartz-scheduler>2.3.0</quartz-scheduler>
+        <slf4j-api>1.7.7</slf4j-api>
     </properties>
 
     <dependencies>
@@ -49,6 +51,18 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${com.fasterxml.jackson}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>${quartz-scheduler}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api}</version>
         </dependency>
 
     </dependencies>

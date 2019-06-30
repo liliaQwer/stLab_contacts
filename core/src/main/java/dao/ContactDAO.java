@@ -234,7 +234,34 @@ public class ContactDAO implements DAO<Contact> {
 
     @Override
     public List<Contact> getList() throws ApplicationException {
-        return null;
+        ArrayList<Contact> contactList = new ArrayList<>();
+        String query = "select * from contact where active_status = ?";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement st = connection.prepareStatement(query)) {
+            st.setString(1, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
+            logger.info(st.toString());
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Contact contact = new Contact();
+                contact.setId(rs.getInt("id"));
+                contact.setName(rs.getString("name"));
+                contact.setSurname(rs.getString("surname"));
+                contact.setPatronymic(rs.getString("patronymic"));
+                contact.setBirthday(rs.getObject("birthday", LocalDate.class));
+                contact.setCompany(rs.getString("company"));
+                contact.setSite(rs.getString("site"));
+                contact.setEmail(rs.getString("email"));
+                contact.setGender(rs.getInt("gender_id"));
+                contact.setMaritalStatus(rs.getInt("marital_status_id"));
+                contact.setNationality(rs.getString("nationality"));
+                contact.setProfilePhoto(rs.getString("profile_photo"));
+                contactList.add(contact);
+            }
+            return contactList;
+        } catch (Exception e) {
+            logger.error(e);
+            throw new ApplicationException();
+        }
     }
 
     @Override

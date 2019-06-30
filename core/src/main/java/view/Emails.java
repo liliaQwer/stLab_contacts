@@ -5,16 +5,16 @@ import model.IdDescription;
 import java.util.ArrayList;
 
 public class Emails {
-    private ArrayList<String> emailList= new ArrayList<>();
+    private ArrayList<ContactEmail> emailList= new ArrayList<>();
 
     public Emails() {
     }
 
-    public ArrayList<String> getEmailList() {
+    public ArrayList<ContactEmail> getEmailList() {
         return emailList;
     }
 
-    public void setEmailList(ArrayList<String> emailList) {
+    public void setEmailList(ArrayList<ContactEmail> emailList) {
         this.emailList = emailList;
     }
 }

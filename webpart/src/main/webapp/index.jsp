@@ -102,6 +102,7 @@
     <h1>Contact Information</h1>
 
     <form class="marginBottom5" id="contactForm">
+        <p id="editContactErrorMessage" class="error hidden"></p>
         <fieldset class="marginBottom5">
             <legend>Basic info</legend>
             <div class="flex flex-wrap flex-justify-center">
@@ -128,7 +129,7 @@
 
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
-                        <input id="birthday" type="date" placeholder="Enter birthday" value="{{birthday}}"/>
+                        <input id="birthday" type="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="Enter birthday" value="{{birthday}}"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -192,7 +193,7 @@
 
                     <div class="form-group">
                         <label for="postalCode">Postal code:</label>
-                        <input id="postalCode" type="text" placeholder="Enter postal code" value="{{postalCode}}"/>
+                        <input id="postalCode" type="number"  placeholder="Enter postal code" value="{{postalCode}}"/>
                     </div>
                 </div>
                 {{/addressInfo}}
@@ -307,19 +308,19 @@
                     <legend>Phone info</legend>
                     <div class="form-group">
                         <label for="countryCode">Country code</label>
-                        <input id="countryCode" min="0" required type="number" value="{{countryCode}}">
+                        <input id="countryCode" min="0" maxlength="3" minlength="3" required type="number" value="{{countryCode}}">
                     </div>
                     <div class="form-group">
                         <label for="operatorCode">Operator code</label>
-                        <input id="operatorCode" min="0" required type="number" value="{{operatorCode}}">
+                        <input id="operatorCode" min="0" required maxlength="2" minlength="2" type="number" value="{{operatorCode}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone number</label>
-                        <input id="phoneNumber" min="0" required type="number" value="{{phoneNumber}}">
+                        <input id="phoneNumber" min="0" minlength="7" maxlength="7" required type="number" value="{{phoneNumber}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneType">Phone type:</label>
-                        <select id="phoneType" required>
+                        <select id="phoneType">
                             <option value="" disabled selected>Select phone type</option>
                             {{#phoneTypesList}}
                             <option value="{{id}}" {{phoneTypesSelected}}>{{description}}</option>
@@ -417,7 +418,7 @@
                     </div>
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
-                        <input id="birthday" type="date" placeholder="Enter birthday"/>
+                        <input id="birthday" type="date"  pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="Enter birthday"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -460,7 +461,7 @@
 
                     <div class="form-group">
                         <label for="postalCode">Postal code:</label>
-                        <input id="postalCode" type="text" placeholder="Enter postal code" value="{{postalCode}}"/>
+                        <input id="postalCode" type="number" placeholder="Enter postal code" value="{{postalCode}}"/>
                     </div>
 
                 </div>
@@ -478,29 +479,29 @@
     <form id="sendEmailForm">
         <fieldset class="marginBottom5">
             <legend>Contact Info</legend>
-                <div>
-                    <div class="form-group">
-                        <label for="to">To</label>
-                        <span id="to">{{#emailList}} {{email}} {{/emailList}}</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Subject:</label>
-                        <input id="subject" type="text" placeholder="Enter subject"/>
-                    </div>
-                    <div class="form-group">
-                        <label for="template">Template:</label>
-                        <select id="template">
-                            <option value="">Select template</option>
-                            {{#templateList}}
-                            <option value="{{name}}">{{name}}</option>
-                            {{/templateList}}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="text">Text:</label>
-                        <textarea rows="5" cols="30" id="text" type="date" placeholder="Enter email text"></textarea>
-                    </div>
+            <div>
+                <div class="form-group">
+                    <label for="to">To</label>
+                    <span id="to">{{#emailList}} {{email}} {{/emailList}}</span>
                 </div>
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input id="subject" type="text" placeholder="Enter subject"/>
+                </div>
+                <div class="form-group">
+                    <label for="template">Template:</label>
+                    <select id="template">
+                        <option value="">Select template</option>
+                        {{#templateList}}
+                        <option value="{{name}}">{{name}}</option>
+                        {{/templateList}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="text">Text:</label>
+                    <textarea rows="5" cols="30" id="text" required type="date" placeholder="Enter email text"></textarea>
+                </div>
+            </div>
         </fieldset>
         <div>
             <button type="button" class="button" id="cancelButton">Cancel</button>

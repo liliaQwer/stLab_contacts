@@ -5,6 +5,7 @@ import model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
+import utils.Message;
 import utils.SearchCriteria;
 import view.*;
 
@@ -177,7 +178,7 @@ public class ContactServiceImpl implements ContactService {
                 result += contactDAO.delete(connection, Integer.parseInt(id));
             }
             if (result != idList.length) {
-                throw new ApplicationException("There was an error during deleting records");
+                throw new ApplicationException(Message.CONTACT_NOT_DELETED);
             }
             connection.commit();
             connection.close();

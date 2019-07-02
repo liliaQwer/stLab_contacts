@@ -7,15 +7,15 @@ import static org.quartz.JobBuilder.newJob;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import email.EmailTemplateHelper;
 import job.MailSendingJob;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import service.ContactService;
 import service.ContactServiceImpl;
 import utils.ApplicationException;
-import view.ContactEmail;
-import view.SendEmailData;
-import view.EmailTemplates;
-import view.Emails;
+import utils.Message;
+import view.*;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +35,8 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 @WebServlet(urlPatterns = {"/email"}, loadOnStartup=1)
 public class EmailServlet extends HttpServlet implements JsonSendable{
+    private final static Logger logger = LogManager.getLogger(EmailServlet.class);
+
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
     private Scheduler scheduler;
@@ -44,7 +45,6 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
-        System.out.println("pathInfo=" + pathInfo);
         if ( request.getParameter("ids") != null){
             loadContactsEmail(response, request.getParameter("ids"));
         }else{
@@ -61,17 +61,21 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
             while ((line = reader.readLine()) != null)
                 jb.append(line);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(resp, new ApplicationException());
         }
-        System.out.println(jb.toString());
         ObjectMapper mapper = new ObjectMapper();
         SendEmailData dataToSendEmail = mapper.readValue(jb.toString(), SendEmailData.class);
 
         try {
             EmailTemplateHelper.sendEmail(dataToSendEmail.getEmailList(),dataToSendEmail.getTemplate(),
                     dataToSendEmail.getText(), dataToSendEmail.getSubject());
+            sendJsonResponse(resp, new MessageInfo(Message.MAIL_SENT));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            sendJsonResponse(resp, new ApplicationException(Message.MAIL_NOT_SENT));
         }
     }
 
@@ -79,7 +83,7 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
         try {
             EmailTemplates templates = new EmailTemplates(EmailTemplateHelper.getAllTemplates());
             sendJsonResponse(response, templates);
-        } catch (MalformedURLException e) {
+        } catch (ApplicationException e) {
             e.printStackTrace();
         }
     }

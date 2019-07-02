@@ -10,7 +10,6 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         _searchCriteria,
         _searchCriteriaValues,
         _lookups,
-        _lookupMap,
         _contactsList,
         _errorMessage,
         _goNextPageButton,
@@ -24,7 +23,8 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         _sendEmailButton,
         _searchContactButton,
         _clearSearchCriteriaButton,
-        _callbacks;
+        _callbacks,
+        _sc_lookupMap;
 
 
     function init() {
@@ -45,9 +45,12 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
             {val: 20, text: "20 items"}
         ];
         appLookup.getLookups()
-            .then(function(data){
+            .then(function (data) {
                 _lookups = data;
-        });
+            })
+            .catch(function (error) {
+                showMessageError(error || _errorMessage);
+            });
         _sc_lookupMap = {
             gender: 'genderList',
             maritalStatus: 'maritalStatusList'
@@ -61,12 +64,7 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         }
         hideErrorMessage();
         fetch(appConstants.URL.contact + appUtils.encodeQueryString(_searchCriteria))
-            .then(function (response) {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error(_errorMessage);
-            })
+            .then(appUtils.handleError)
             .then(function (data) {
                 fillSearchCriteriaValues();
                 _totalContacts = data.totalAmount;
@@ -95,7 +93,7 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
                 assignEvents();
             })
             .catch(function (error) {
-                showMessageError(error);
+                showMessageError(error || _errorMessage);
             });
     }
 
@@ -103,7 +101,7 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         return Math.ceil(_totalContacts / _searchCriteria.pageSize);
     }
 
-    function fillSearchCriteriaValues(){
+    function fillSearchCriteriaValues() {
         /*_searchCriteriaValues = [];
         var scKeys = Object.keys(_searchCriteria);
         var lmKeys = Object.keys(_sc_lookupMap);
@@ -126,17 +124,17 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         _searchCriteriaValues = [];
         var scKeys = Object.keys(_searchCriteria);
         for (var i = 0; i < scKeys.length; i++) {
-            if (scKeys[i] == 'pageSize' || scKeys[i] == 'pageNumber'){
+            if (scKeys[i] == 'pageSize' || scKeys[i] == 'pageNumber') {
                 continue;
             }
             var searchCrValue = _searchCriteria[scKeys[i]];
             if (_searchCriteria[scKeys[i]]) {
-                if (_lookups.hasOwnProperty(scKeys[i] + "List")){
-                    var description = _lookups[scKeys[i] + "List"].filter(function(obj){
+                if (_lookups.hasOwnProperty(scKeys[i] + "List")) {
+                    var description = _lookups[scKeys[i] + "List"].filter(function (obj) {
                         return obj.id == searchCrValue
                     })[0].description;
                     _searchCriteriaValues.push(description);
-                }else{
+                } else {
                     _searchCriteriaValues.push(searchCrValue);
                 }
             }
@@ -158,18 +156,17 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
 
     function deleteContact(idList) {
         fetch(appConstants.URL.contact + "/" + idList, {method: 'delete'})
-            .then(function (response) {
-                if (response.ok) {
-                    return showContactsList();
-                }
-                throw new Error(_errorMessage);
+            .then(appUtils.handleError)
+            .then(function (data) {
+                alert(data.message);
+                return showContactsList();
             })
             .catch(function (error) {
-                showMessageError(error);
+                showMessageError(error || _errorMessage);
             });
     }
 
-    function getCheckedIdList(){
+    function getCheckedIdList() {
         var inputElements = document.getElementsByClassName('check');
         var idList = new Array();
         for (var i = 0; inputElements[i]; ++i) {
@@ -192,11 +189,11 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         _sendEmailButton = document.getElementById("sendEmail");
         _addContactButton = document.getElementById("addContact");
         _searchContactButton = document.getElementById("searchContact");
-        _clearSearchCriteriaButton =  document.getElementsByClassName("clearSearch")[0];
+        _clearSearchCriteriaButton = document.getElementsByClassName("clearSearch")[0];
 
-        if(_clearSearchCriteriaButton){
-            _clearSearchCriteriaButton.onclick = function(){
-                _searchCriteria ={
+        if (_clearSearchCriteriaButton) {
+            _clearSearchCriteriaButton.onclick = function () {
+                _searchCriteria = {
                     pageNumber: appConstants.PAGE_NUMBER_DEFAULT,
                     pageSize: appConstants.PAGE_SIZE_DEFAULT
                 };
@@ -239,8 +236,8 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
             deleteContact(idList);
         };
 
-        _searchContactButton.onclick = function(){
-            if (_callbacks.onSearchContact && typeof _callbacks.onSearchContact == 'function'){
+        _searchContactButton.onclick = function () {
+            if (_callbacks.onSearchContact && typeof _callbacks.onSearchContact == 'function') {
                 _callbacks.onSearchContact();
             }
         };
@@ -257,7 +254,7 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
                 alert(appConstants.messages.SELECT_CONTACT_WARNING);
                 return;
             }
-            if (_callbacks.onSendEmail && typeof _callbacks.onSendEmail == 'function'){
+            if (_callbacks.onSendEmail && typeof _callbacks.onSendEmail == 'function') {
                 _callbacks.onSendEmail(idList);
             }
         };

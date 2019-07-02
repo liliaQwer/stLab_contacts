@@ -1,6 +1,7 @@
-App.SearchController = (function(appConstants, appLookup){
+App.SearchController = (function (appConstants, appLookup, appUtils) {
     var _containerElement,
         _mustacheTemplate,
+        _messageErrorElement,
         _searchForm,
         _submitSearchFormButton,
         _cancelButton,
@@ -12,7 +13,7 @@ App.SearchController = (function(appConstants, appLookup){
         _marital_statusElement,
         _nationalityElement,
         _callbacks,
-        
+
         /* address info elements */
         _countryElement,
         _cityElement,
@@ -22,14 +23,16 @@ App.SearchController = (function(appConstants, appLookup){
         _lookupsData,
         _contactData;
 
-    function init(){
+    function init() {
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("searchTemplate").innerHTML;
+        _messageErrorElement = document.getElementById("messageError");
 
-        appLookup.getLookups().then(function (data) {
-            _lookupsData = data;
-            render();
-        });
+        appLookup.getLookups()
+            .then(function (data) {
+                _lookupsData = data;
+                render();
+            });
     }
 
     function render() {
@@ -53,8 +56,13 @@ App.SearchController = (function(appConstants, appLookup){
         _submitSearchFormButton = document.getElementById("submitSearchFormButton");
         _cancelButton = document.getElementById("cancelButton");
 
-        _searchForm.onsubmit = function(e){
+        _searchForm.onsubmit = function (e) {
             e.preventDefault();
+            var validationResult = validateData();
+            if (!validationResult.isValid){
+                showMessageError(validationResult.errorList.join(", "));
+                return;
+            }
 
             _contactData = {
                 pageSize: appConstants.PAGE_SIZE_DEFAULT,
@@ -72,16 +80,39 @@ App.SearchController = (function(appConstants, appLookup){
                 postalCode: _postalCodeElement.value
             }
 
-             if (_callbacks.onSearch && typeof _callbacks.onSearch == 'function'){
-                 _callbacks.onSearch(_contactData);
-             }
+            if (_callbacks.onSearch && typeof _callbacks.onSearch == 'function') {
+                _callbacks.onSearch(_contactData);
+            }
         };
 
-        _cancelButton.onclick = function(){
-            if (_callbacks.onCancel && typeof _callbacks.onCancel == 'function'){
+        _cancelButton.onclick = function () {
+            if (_callbacks.onCancel && typeof _callbacks.onCancel == 'function') {
                 _callbacks.onCancel();
             }
         }
+    }
+
+    function showMessageError(error) {
+        _messageErrorElement.classList.remove('hidden');
+        _messageErrorElement.innerText = error;
+    }
+
+    function validateData(){
+        var validationResult = {
+            errorList: [],
+            isValid: false
+        }
+        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_POSTAL_CODE);
+        }
+
+        if (_birthdayElement.value && !appUtils.isValidDate(_birthdayElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_DATE)
+        }
+        if (validationResult.errorList.length == 0){
+            validationResult.isValid = true;
+        }
+        return validationResult;
     }
 
     _callbacks = {
@@ -93,4 +124,4 @@ App.SearchController = (function(appConstants, appLookup){
         init: init,
         callbacks: _callbacks
     }
-}(App.Constants, App.LookupRepository));
+}(App.Constants, App.LookupRepository, App.Utils));

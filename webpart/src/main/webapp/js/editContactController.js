@@ -41,6 +41,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("contactTemplate").innerHTML;
+        hideErrorMessage();
         _contactData = {
             id: -1,
             name: null,
@@ -86,6 +87,9 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             })
             .then(function () {
                 render(true);
+            })
+            .catch(function (error) {
+                showMessageError(error || _errorMessage);
             });
     }
 
@@ -112,10 +116,9 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
     }
 
     function loadContactInfo(contactId) {
+        hideErrorMessage();
         return fetch(appConstants.URL.contact + "/" + contactId)
-            .then(function (response) {
-                return response.json();
-            })
+            .then(utils.handleError)
             .then(function (data) {
                 var contactProfileDir = appConstants.URL.profilePhoto + "/" + data.id + "/";
                 _contactData = utils.merge({}, _contactData, data, {
@@ -143,7 +146,10 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
                     }
                 });
                 return _contactData;
-            });
+            })
+            .catch(function (error) {
+                showMessageError(error || appConstants.messages.ERROR_MESSAGE);
+            })
 
     }
 
@@ -406,13 +412,48 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
 
         _contactForm.onsubmit = function (e) {
             e.preventDefault();
-            refreshContactData();
-            saveContact();
+            var validationResult = validateData();
+            if (validationResult.isValid){
+                refreshContactData();
+                saveContact();
+            }else {
+                showMessageError(validationResult.errorList.join(", "));
+            }
         }
 
         _cancelButton.onclick = function () {
             cancel();
         }
+    }
+
+    function validateData(){
+        var validationResult = {
+            errorList: [],
+            isValid: false
+        }
+        if (!_nameElement.value){
+            validationResult.errorList.push(appConstants.messages.REQUIRED_NAME);
+        }
+        if (!_surnameElement.value){
+            validationResult.errorList.push(appConstants.messages.REQUIRED_SURNAME);
+        }
+        if (_emailElement.value && !appConstants.patterns.email.test(_emailElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_MAIL);
+        }
+        if (_siteElement.value && !appConstants.patterns.site.test(_siteElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_SITE);
+        }
+        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_POSTAL_CODE);
+        }
+
+        if (_birthdayElement.value && !utils.isValidDate(_birthdayElement.value)){
+            validationResult.errorList.push(appConstants.messages.INVALID_DATE)
+        }
+        if (validationResult.errorList.length == 0){
+            validationResult.isValid = true;
+        }
+        return validationResult;
     }
 
     function refreshContactData() {
@@ -437,6 +478,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
     }
 
     function saveContact() {
+        hideErrorMessage();
         var formData = new FormData();
         var attachmentsToSend = {};
         var data = {
@@ -508,9 +550,13 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             method: data.id < 0 ? 'POST' : 'PUT',
             body: formData
         })
+            .then(utils.handleError)
             .then(function () {
                 alert("Contact saved");
                 cancel();
+            })
+            .catch(function (error) {
+                showMessageError(error || appConstants.messages.ERROR_MESSAGE);
             })
     }
 
@@ -522,6 +568,15 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         if (_callbacks.onCancel && typeof _callbacks.onCancel === "function") {
             _callbacks.onCancel();
         }
+    }
+
+    function showMessageError(error) {
+        _messageErrorElement.classList.remove('hidden');
+        _messageErrorElement.innerText = error;
+    }
+
+    function hideErrorMessage() {
+        _messageErrorElement.classList.add('hidden');
     }
 
     _callbacks = {

@@ -6,10 +6,7 @@ import org.apache.logging.log4j.Logger;
 import utils.ApplicationException;
 import utils.SearchCriteria;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,10 +48,10 @@ public class PhoneDAO implements DAO<Phone> {
         String insertQuery = "update phone set id=?, country_code=?, oper_code=?, number=?, type=?, comment=? where contact_id=?";
         try (PreparedStatement st = connection.prepareStatement(insertQuery)){
             st.setInt(1, o.getId());
-            st.setInt(2, o.getCountryCode());
-            st.setInt(3, o.getOperatorCode());
-            st.setInt(4, o.getPhoneNumber());
-            st.setInt(5, o.getPhoneType());
+            st.setObject(2, o.getCountryCode(), Types.INTEGER);
+            st.setObject(3, o.getOperatorCode(), Types.INTEGER);
+            st.setObject(4, o.getPhoneNumber(), Types.INTEGER);
+            st.setObject(5, o.getPhoneType(), Types.INTEGER);
             st.setString(6, getStringOrNull(o.getComment()));
             st.setInt(7, o.getContactId());
             logger.info(st.toString());
@@ -83,10 +80,10 @@ public class PhoneDAO implements DAO<Phone> {
         String insertQuery = "INSERT INTO phone (contact_id, country_code, oper_code, number, type, comment) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement st = connection.prepareStatement(insertQuery)){
             st.setInt(1, o.getContactId());
-            st.setInt(2, o.getCountryCode());
-            st.setInt(3, o.getOperatorCode());
-            st.setInt(4, o.getPhoneNumber());
-            st.setInt(5, o.getPhoneType());
+            st.setObject(2, o.getCountryCode(), Types.INTEGER);
+            st.setObject(3, o.getOperatorCode(), Types.INTEGER);
+            st.setObject(4, o.getPhoneNumber(), Types.INTEGER);
+            st.setObject(5, o.getPhoneType(), Types.INTEGER);
             st.setString(6, getStringOrNull(o.getComment()));
             logger.info(st.toString());
             return st.executeUpdate();

@@ -14,16 +14,48 @@ App.Utils = (function () {
     function encodeQueryString(params) {
         var keys = Object.keys(params);
         var str = keys.length
-            ? "?" + keys.map(function(key){
-                    return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
-                }).join("&")
+            ? "?" + keys.map(function (key) {
+            return encodeURIComponent(key) + "=" + encodeURIComponent(params[key]);
+        }).join("&")
             : "";
         console.log(str);
         return str;
     }
 
+    function handleError(response) {
+        var json = response.json();
+        if (!response.ok) {
+            return json.then(function (data) {
+                throw new Error(data.message);
+            })
+        }
+        return json;
+    }
+
+    function isValidDate(dateString){
+        var regex_date = /^\d{4}\-\d{1,2}\-\d{1,2}$/;
+        if(!regex_date.test(dateString)){
+            return false;
+        }
+        var parts   = dateString.split("-");
+        var day     = parseInt(parts[2], 10);
+        var month   = parseInt(parts[1], 10);
+        var year    = parseInt(parts[0], 10);
+         if(year < 1000 || year > 3000 || month == 0 || month > 12){
+            return false;
+        }
+        var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+        if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0)){
+            monthLength[1] = 29;
+        }return day > 0 && day <= monthLength[month - 1];
+    }
+
     return {
         merge: mergeObjects,
-        encodeQueryString: encodeQueryString
+        encodeQueryString: encodeQueryString,
+        handleError: handleError,
+        isValidDate: isValidDate
     }
+
+
 })();

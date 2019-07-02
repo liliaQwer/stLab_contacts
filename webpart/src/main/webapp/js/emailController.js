@@ -13,34 +13,40 @@ App.EmailController = function (appConstants, utils) {
         _cancelButton,
 
         _templateList,
-        _emailList;
+        _emailList,
+        _callbacks;
 
     function init(contactIdList) {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("sendEmailTemplate").innerHTML;
+        hideErrorMessage();
 
         _errorMessage = appConstants.messages.ERROR_MESSAGE;
         fetch(appConstants.URL.email + "?ids=" + contactIdList)
-            .then(function (response) {
-                return response.json();
-            }).then(function (data) {
-            if (data) {
-                _emailList = data.emailList;
-                return loadTemplate();
-            }
-        }).then(function (data) {
-            if (data) {
-                _templateList = data.templateList;
-                render();
-            }
-        });
+            .then(utils.handleError)
+            .then(function (data) {
+                if (data) {
+                    _emailList = data.emailList;
+                    return loadTemplate();
+                }
+            })
+            .then(function (data) {
+                if (data) {
+                    _templateList = data.templateList;
+                    render();
+                }
+            })
+            .catch(function (error) {
+                showMessageError(error || appConstants.messages.ERROR_MESSAGE);
+            })
     }
 
     function loadTemplate() {
         return fetch(appConstants.URL.email)
-            .then(function (response) {
-                return response.json();
+            .then(utils.handleError)
+            .catch(function (error) {
+                showMessageError(error || appConstants.messages.ERROR_MESSAGE);
             })
     }
 
@@ -92,16 +98,25 @@ App.EmailController = function (appConstants, utils) {
                     method: 'POST',
                     body: JSON.stringify(data)
                 })
-                    .then(function (response) {
-                        if(response.ok){
-                            alert(appConstants.messages.SUCCESS_EMAIL_SENDING);
-                            cancel();
-                        }else {
-                            _messageErrorElement.value = +_errorMessage;
-                        }
+                    .then(utils.handleError)
+                    .then(function (data) {
+                        alert(data.message);
+                        cancel();
+                    })
+                    .catch(function (error) {
+                        showMessageError(error || appConstants.messages.ERROR_MESSAGE);
                     })
             }
         };
+    }
+
+    function showMessageError(error) {
+        _messageErrorElement.classList.remove('hidden');
+        _messageErrorElement.innerText = error;
+    }
+
+    function hideErrorMessage() {
+        _messageErrorElement.classList.add('hidden');
     }
 
     function cancel() {

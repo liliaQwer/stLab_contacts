@@ -16,7 +16,15 @@ App.Constants = {
         SELECT_SINGLE_ATTACHMENT_WARNING: "You should check only 1 attachment for editing!",
         FULL_PHONE_LENGTH_INVALID: "Full phone number should be 15 digits or shorter",
         INVALID_PROFILE_PHOTO_FILE: "Only images are allowed for a profile photo",
-        SUCCESS_EMAIL_SENDING: "Emails were successfully sent"
+        REQUIRED_NAME: "Name is required",
+        REQUIRED_SURNAME: "Surname is required",
+        INVALID_MAIL: "Email is invalid",
+        INVALID_SITE: "Site is invalid",
+        INVALID_DATE: "Date is invalid",
+        INVALID_POSTAL_CODE: "PostalCode is invalid",
+        INVALID_COUNTRY_CODE: "Country code is invalid",
+        INVALID_OPERATOR_CODE: "Operator code is invalid",
+        INVALID_PHONE_NUMBER: "Phone number is invalid"
     },
     URL: {
         contact: "contacts",
@@ -24,5 +32,9 @@ App.Constants = {
         profilePhoto: "profilePhotos",
         attachment: "attachments",
         email: "email"
+    },
+    patterns:{
+        email: /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
+        site: /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
     }
 };

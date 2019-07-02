@@ -1,25 +1,30 @@
 package servlet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import upload.FileHelper;
+import utils.ApplicationException;
+import utils.Message;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 
 @WebServlet(urlPatterns = {"/attachments/*"})
-public class AttachmentServlet extends HttpServlet {
+public class AttachmentServlet extends HttpServlet implements JsonSendable{
+    private final static Logger logger = LogManager.getLogger(AttachmentServlet.class);
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws  IOException {
         String requestedFile = req.getPathInfo();
         if (requestedFile == null){
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            sendJsonResponse(resp, new ApplicationException(Message.FILE_NOT_FOUND));
+            return;
         }
         requestedFile = requestedFile.replaceAll("/","\\\\");
         String fileName = requestedFile.substring(requestedFile.lastIndexOf(File.separator));
@@ -29,12 +34,11 @@ public class AttachmentServlet extends HttpServlet {
         try {
             fileHelper.readAttachment(requestedFile, out);
             out.flush();
-        }catch(FileNotFoundException e){
+        }catch(IOException e){
+            logger.error(e);
             resp.setHeader("Content-disposition", "inline");
-            resp.getOutputStream().print("Sorry, your file was not found...");
-        }catch(IOException ex){
-            ex.printStackTrace();
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            sendJsonResponse(resp, new ApplicationException(Message.FILE_NOT_FOUND));
         }
     }
 }

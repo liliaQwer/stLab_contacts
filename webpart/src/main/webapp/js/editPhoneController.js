@@ -69,6 +69,12 @@ App.EditPhoneController = (function (appConstants, utils) {
         _form.onsubmit = function (e) {
             e.preventDefault();
 
+            var validationResult = validateData();
+            if (!validationResult.isValid){
+                showMessageError(validationResult.errorList.join(", "));
+                return;
+            }
+
             var phoneData = utils.merge({}, _phoneData, {
                 countryCode: _countryCodeElement.value,
                 operatorCode: _operatorCodeElement.value,
@@ -86,6 +92,26 @@ App.EditPhoneController = (function (appConstants, utils) {
             }
             hideModal();
         };
+    }
+
+    function validateData(){
+        var validationResult = {
+            errorList: [],
+            isValid: false
+        }
+        if (_countryCodeElement.value && (isNaN(_countryCodeElement.value) || _countryCodeElement.value.length != 3)){
+            validationResult.errorList.push(appConstants.messages.INVALID_COUNTRY_CODE);
+        }
+        if (_operatorCodeElement.value && (isNaN(_operatorCodeElement.value) || _operatorCodeElement.value.length != 2)){
+            validationResult.errorList.push(appConstants.messages.INVALID_OPERATOR_CODE);
+        }
+        if (_phoneNumberElement.value && (isNaN(_phoneNumberElement.value) || _phoneNumberElement.value.length != 7)){
+            validationResult.errorList.push(appConstants.messages.INVALID_PHONE_NUMBER);
+        }
+        if (validationResult.errorList.length == 0){
+            validationResult.isValid = true;
+        }
+        return validationResult;
     }
 
     function showMessageError(error) {

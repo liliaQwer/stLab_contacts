@@ -15,5 +15,6 @@ public class Message {
     public static String CONTACT_DELETED = "Contact was deleted";
     public static String CONTACT_UPDATED = "Contact was updated";
     public static String CONTACT_SAVED = "Contact was saved";
+    public static String CONTACT_NOT_SAVED = "Contact was not saved";
     public static String MAIL_SENT = "Mail was sent";
 }

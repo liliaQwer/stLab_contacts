@@ -9,7 +9,7 @@
     <script type="text/javascript" src="js/fetch.umd.js"></script>
     <script type="text/javascript" src="js/promise.min.js"></script>
     <link rel="stylesheet" href="css/modal.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <p id="messageError" class="error hidden"></p>
@@ -418,6 +418,11 @@
                     </div>
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
+                        <select id="birthdayOperator" class="operator">
+                            <option value="=">Equals</option>
+                            <option value=">">Greater</option>
+                            <option value="<">Less</option>
+                        </select>
                         <input id="birthday" type="date"  pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="Enter birthday"/>
                     </div>
                     <div class="form-group">
@@ -509,6 +514,10 @@
         </div>
     </form>
 </script>
+
+<div id="loaderContainer" class="modal transparent hidden">
+    <img id="loader" src="img/loading.gif"/>
+</div>
 
 <script type="text/javascript">
     var App = {};

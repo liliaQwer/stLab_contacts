@@ -76,7 +76,7 @@
         var mergedObject = {};
         for (var property in defaults) {
             if (defaults.hasOwnProperty(property)) {
-                mergedObject[property] = settings[property] ? settings[property] : defaults[property];
+                mergedObject[property] = settings.hasOwnProperty(property) ? settings[property] : defaults[property];
             }
         }
 

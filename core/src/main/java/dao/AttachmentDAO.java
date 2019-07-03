@@ -3,11 +3,12 @@ package dao;
 import model.Attachment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import utils.ApplicationException;
+import utils.DateFormatter;
 import utils.SearchCriteria;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class AttachmentDAO implements DAO<Attachment> {
@@ -46,8 +47,8 @@ public class AttachmentDAO implements DAO<Attachment> {
         try (PreparedStatement st = connection.prepareStatement(updateQuery)){
             st.setString(1, o.getFileName());
             st.setString(2, getStringOrNull(o.getComment()));
-            System.out.println("upload in edit DAO " + o.getUploadDate());
-            st.setObject(3, o.getUploadDate(), Types.DATE);
+            st.setDate(3, DateFormatter.convertToDatabaseColumn(o.getUploadDate()), Calendar.getInstance());
+            //st.setObject(3, o.getUploadDate(), Types.DATE);
             st.setInt(4, o.getId());
             logger.info(st.toString());
             return st.executeUpdate();

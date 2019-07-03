@@ -9,6 +9,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _surnameElement,
         _patronymicElement,
         _birthdayElement,
+        _birthdayOperatorElement,
         _genderElement,
         _marital_statusElement,
         _nationalityElement,
@@ -43,6 +44,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _surnameElement = document.getElementById('surname');
         _patronymicElement = document.getElementById('patronymic');
         _birthdayElement = document.getElementById('birthday');
+        _birthdayOperatorElement = document.getElementById('birthdayOperator')
         _genderElement = document.getElementById('gender');
         _marital_statusElement = document.getElementById('marital_status');
         _nationalityElement = document.getElementById('nationality');
@@ -70,7 +72,6 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
                 name: _nameElement.value,
                 surname: _surnameElement.value,
                 patronymic: _patronymicElement.value,
-                birthday: _birthdayElement.value,
                 gender: _genderElement.value,
                 maritalStatus: _marital_statusElement.value,
                 nationality: _nationalityElement.value,
@@ -78,6 +79,10 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
                 city: _cityElement.value,
                 street: _streetElement.value,
                 postalCode: _postalCodeElement.value
+            };
+            if (_birthdayElement.value){
+                _contactData.birthdayOperator = _birthdayOperatorElement.value;
+                _contactData.birthday = _birthdayElement.value;
             }
 
             if (_callbacks.onSearch && typeof _callbacks.onSearch == 'function') {

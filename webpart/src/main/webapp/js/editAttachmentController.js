@@ -59,16 +59,17 @@ App.EditAttachmentController = (function (appConstants, utils) {
             e.preventDefault();
             var today = new Date();
             var date = today.getDate();
+            date = (date < 10) ? '0' + date : date;
             var year = today.getFullYear();
             var month = today.getMonth() + 1;
             month = (month < 10)  ? '0' + month : month;
             var formattedDate = year + "-" + month + "-" + date;
             var attachmentData = utils.merge({}, _attachmentData, {
-                uploadDate: formattedDate,
                 comment: _commentElement.value
             });
 
             if (_uploadedFile) {
+                attachmentData.uploadDate = formattedDate;
                 attachmentData.uploadedFile = _uploadedFile;
                 attachmentData.fileName = _uploadedFile.name;
                 attachmentData.isNew = true;

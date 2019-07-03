@@ -48,7 +48,11 @@ public class AddressDAO implements DAO<Address>{
             ResultSet countRs = countSt.executeQuery();
             countRs.next();
             if (countRs.getInt(1) == 0){
-                return save(connection, o);
+                if (!o.isEmpty()){
+                    return save(connection, o);
+                } else{
+                    return 0;
+                }
             }
             updateSt.setInt(5, o.getContactId());
             updateSt.setString(1, getStringOrNull(o.getCountry()));

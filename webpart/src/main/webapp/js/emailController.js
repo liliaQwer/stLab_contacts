@@ -3,7 +3,8 @@ App.EmailController = function (appConstants, utils) {
         _containerElement,
         _mustacheTemplate,
         _errorMessage,
-
+        _loaderContainer,
+        _loaderModal,
         _toContactsEmailsElement,
         _textElement,
         _subjectElement,
@@ -20,6 +21,12 @@ App.EmailController = function (appConstants, utils) {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("sendEmailTemplate").innerHTML;
+        _loaderContainer = document.getElementById("loaderContainer");
+        _loaderModal = new Modal(_loaderContainer, {
+            closeOnEscape: false,
+            closeOnClickOutside: false}
+            );
+
         hideErrorMessage();
 
         _errorMessage = appConstants.messages.ERROR_MESSAGE;
@@ -81,7 +88,7 @@ App.EmailController = function (appConstants, utils) {
                 _textElement.value = "";
                 _textElement.removeAttribute("disabled");
             }
-        }
+        };
 
         _sendEmailForm.onsubmit = function (e) {
             e.preventDefault();
@@ -93,19 +100,26 @@ App.EmailController = function (appConstants, utils) {
                     subject: subject,
                     text: text,
                     template: _templateElement.value
-                }
+                };
+                _loaderModal.show();
                 fetch(appConstants.URL.email, {
                     method: 'POST',
                     body: JSON.stringify(data)
                 })
                     .then(utils.handleError)
                     .then(function (data) {
-                        alert(data.message);
-                        cancel();
+                        _loaderModal.hide();
+                        setTimeout(function () {
+                            alert(data.message);
+                            cancel();
+                        }, 1);
+
                     })
                     .catch(function (error) {
+                        _loaderModal.hide();
                         showMessageError(error || appConstants.messages.ERROR_MESSAGE);
-                    })
+                    });
+
             }
         };
     }

@@ -6,6 +6,7 @@ import static org.quartz.JobBuilder.newJob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import email.EmailTemplateHelper;
+import job.EmailSchedule;
 import job.MailSendingJob;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,6 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
         if ( request.getParameter("ids") != null){
             loadContactsEmail(response, request.getParameter("ids"));
         }else{
@@ -89,7 +89,6 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
     }
 
     private void loadContactsEmail(HttpServletResponse response, String contactsIdStr){
-        System.out.println("contactIdstr= " + contactsIdStr);
         List<Integer> idList = Arrays.stream(contactsIdStr.split(",")).map(Integer::valueOf).collect(Collectors.toList());
         Emails emails = new Emails();
         try {
@@ -102,7 +101,7 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
                 }
             }
             sendJsonResponse(response, emails);
-        } catch (ApplicationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             sendJsonResponse(response, e);
@@ -124,27 +123,7 @@ public class EmailServlet extends HttpServlet implements JsonSendable{
     public void init() throws ServletException {
         super.init();
         service = new ContactServiceImpl(dataSource);
-        System.out.println("Before doing job");
-        SchedulerFactory sf = new StdSchedulerFactory();
-        try {
-            scheduler = sf.getScheduler();
-            JobDetail job = newJob(MailSendingJob.class)
-                    .withIdentity("job", "group1")
-                    .build();
-            job.getJobDataMap().put("dataSource", dataSource);
-            Date startTime = evenMinuteDate(new Date());
-            SimpleTrigger trigger = newTrigger()
-                    .withIdentity("trigger", "group1")
-                    .startAt(startTime)
-                    .withSchedule(simpleSchedule()
-                            .withIntervalInSeconds(24*60*60)
-                            .repeatForever())
-                    .build();
-            scheduler.scheduleJob(job, trigger);
-            scheduler.start();
-            System.out.println("Before shut down");
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
+        EmailSchedule schedule = new EmailSchedule(dataSource);
+        scheduler = schedule.start();
     }
 }

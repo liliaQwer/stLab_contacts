@@ -2,32 +2,16 @@ package dao;
 
 import model.Contact;
 import org.apache.logging.log4j.LogManager;
-import utils.ApplicationException;
-import utils.ContactStatus;
+import utils.*;
 
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
-import utils.SearchCriteria;
-
-@FunctionalInterface
-interface Consumer<X, Y, Z> {
-    void apply(X x, Y y, Z z) throws SQLException;
-}
-
-class MapData {
-    MapData(Object value, Consumer<PreparedStatement, Integer, Object> consumer) {
-        this.value = value;
-        this.consumer = consumer;
-    }
-
-    Object value;
-    Consumer<PreparedStatement, Integer, Object> consumer;
-}
 
 public class ContactDAO implements DAO<Contact> {
     private final static Logger logger = LogManager.getRootLogger();
@@ -119,12 +103,13 @@ public class ContactDAO implements DAO<Contact> {
                                                              boolean isTotalCountQuery) throws SQLException {
         StringBuilder sbQuery = new StringBuilder(query);//"select * from contact where active_status = ? limit ?,?"
         Field[] allFields = SearchCriteria.class.getDeclaredFields();
+        List<String> fieldNames = Arrays.stream(allFields).map(field -> field.getName()).collect(Collectors.toList());
         AtomicInteger index = new AtomicInteger();
         Map<Integer, MapData> mapData = new HashMap<>();
         Arrays.stream(allFields).filter(field -> {
             field.setAccessible(true);
             try {
-                if (field.get(searchCriteria) != null && fieldsDictionary.containsKey(field.getName())) {
+                if (field.get(searchCriteria) != null && (field.getName().contains("Operator") || fieldsDictionary.containsKey(field.getName()))) {
                     return true;
                 }
             } catch (IllegalAccessException e) {
@@ -133,8 +118,17 @@ public class ContactDAO implements DAO<Contact> {
             return false;
         }).forEach(field -> {
             try {
-                sbQuery.append(fieldsDictionary.get(field.getName())).append("=? and ");
-
+                //if fieldName contains 'operator', set its value to query string
+                if (field.getName().contains("Operator")){
+                    String columnName = field.getName().replace("Operator", "");
+                    sbQuery.append(fieldsDictionary.get(columnName)).append(field.get(searchCriteria)).append("? and ");
+                    return;
+                }else{
+                    //append field to query string  if it doesn't have appropriate operator field
+                    if (!fieldNames.stream().anyMatch(name -> name.equals(field.getName() + "Operator"))) {
+                        sbQuery.append(fieldsDictionary.get(field.getName())).append("=? and ");
+                    }
+                }
                 if (field.getType() == Integer.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->
                             statement.setInt(idx, (Integer) value)
@@ -145,7 +139,7 @@ public class ContactDAO implements DAO<Contact> {
                     ));
                 } else if (field.getType() == LocalDate.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->
-                            statement.setObject(idx, value)
+                            statement.setDate(idx, DateFormatter.convertToDatabaseColumn((LocalDate)value), Calendar.getInstance())
                     ));
                 }
             } catch (IllegalAccessException e) {
@@ -155,14 +149,14 @@ public class ContactDAO implements DAO<Contact> {
         if (isTotalCountQuery){
             sbQuery.append(" active_status = ?");
         }else{
-            sbQuery.append(" active_status = ? limit ?,?");
+            sbQuery.append(" active_status = ? order by name limit ?,?");
         }
         System.out.println("sbQuery.toString = " + sbQuery.toString());
         PreparedStatement st = con.prepareStatement(sbQuery.toString());
         for (Map.Entry<Integer, MapData> cursor : mapData.entrySet()) {
             Integer idx = cursor.getKey();
             MapData mData = cursor.getValue();
-            mData.consumer.apply(st, idx, mData.value);
+            mData.getConsumer().apply(st, idx, mData.getValue());
         }
         st.setString(index.incrementAndGet(), String.valueOf(ContactStatus.ACTIVATED.getStatus()));
         if (!isTotalCountQuery){
@@ -199,7 +193,7 @@ public class ContactDAO implements DAO<Contact> {
     @Override
     public List<Contact> getList(Connection connection) throws SQLException {
         ArrayList<Contact> contactList = new ArrayList<>();
-        String query = "select * from contact where active_status = ?";
+        String query = "select * from contact where active_status = ? order by name";
         try {
             PreparedStatement st = connection.prepareStatement(query);
             st.setString(1, String.valueOf(ContactStatus.ACTIVATED.getStatus()));
@@ -243,7 +237,8 @@ public class ContactDAO implements DAO<Contact> {
             insertSt.setString(1, o.getName());
             insertSt.setString(2, getStringOrNull(o.getPatronymic()));
             insertSt.setString(3, o.getSurname());
-            insertSt.setObject(4, o.getBirthday(), Types.DATE);
+            insertSt.setDate(4, DateFormatter.convertToDatabaseColumn(o.getBirthday()), Calendar.getInstance());
+            //insertSt.setObject(4, o.getBirthday(), Types.DATE);
             insertSt.setString(5, getStringOrNull(o.getCompany()));
             insertSt.setString(6, getStringOrNull(o.getNationality()));
             insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
@@ -253,8 +248,9 @@ public class ContactDAO implements DAO<Contact> {
             insertSt.setString(11, getStringOrNull(o.getProfilePhoto()));
             insertSt.setInt(12, o.getId());
             logger.info(insertSt.toString());
+            int result = insertSt.executeUpdate();
             insertSt.close();
-            return insertSt.executeUpdate();
+            return result;
         } catch (SQLException e) {
             logger.error(e);
             throw e;
@@ -292,7 +288,8 @@ public class ContactDAO implements DAO<Contact> {
             insertSt.setString(1, o.getName());
             insertSt.setString(2, getStringOrNull(o.getPatronymic()));
             insertSt.setString(3, o.getSurname());
-            insertSt.setObject(4, o.getBirthday(), Types.DATE);
+            insertSt.setDate(4, DateFormatter.convertToDatabaseColumn(o.getBirthday()), Calendar.getInstance());
+            //insertSt.setObject(4, o.getBirthday(), Types.DATE);
             insertSt.setString(5, getStringOrNull(o.getCompany()));
             insertSt.setString(6, getStringOrNull(o.getNationality()));
             insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);

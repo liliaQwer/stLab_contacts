@@ -8,6 +8,7 @@ public class SearchCriteria {
     private String name;
     private String surname;
     private String patronymic;
+    private String birthdayOperator;
     private LocalDate birthday;
     private Integer gender;
     private Integer maritalStatus;
@@ -131,5 +132,13 @@ public class SearchCriteria {
                 .filter(s -> s != null)
                 .collect(Collectors.joining(" "));
         return fullName;
+    }
+
+    public String getBirthdayOperator() {
+        return birthdayOperator;
+    }
+
+    public void setBirthdayOperator(String birthdayOperator) {
+        this.birthdayOperator = birthdayOperator;
     }
 }

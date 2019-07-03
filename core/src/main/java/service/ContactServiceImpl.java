@@ -208,8 +208,9 @@ public class ContactServiceImpl implements ContactService {
             int contactId = contactDAO.save(connection, o.getContact());
 
             if (contactId < 1) {
-                throw new ApplicationException("Cannot save contact");
+                throw new ApplicationException(Message.CONTACT_NOT_SAVED);
             }
+            o.setId(contactId);
             if (!o.getAddressInfo().isEmpty()) {
                 o.getAddressInfo().setContactId(contactId);
                 addressDAO.save(connection, o.getAddressInfo());
@@ -221,8 +222,8 @@ public class ContactServiceImpl implements ContactService {
                     try {
                         attachment = ViewHelper.prepareAttachment(attachmentView);
                     } catch (ParseException e) {
-                        e.printStackTrace();
-                        throw new ApplicationException("ParseException");
+                        logger.error(e);
+                        throw new ApplicationException(e.getMessage());
                     }
                     attachmentDAO.save(connection, attachment);
                 }

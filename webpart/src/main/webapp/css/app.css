@@ -187,7 +187,13 @@ fieldset legend {
     border-radius: 5px;
     border: 1px solid #ccc;
     border-right: 3px solid #ccc;
-    flex-basis: 200px;
+    flex-basis: 250px;
+}
+.operator{
+    flex-basis: 50px!important;
+}
+#birthday{
+    flex-basis: 170px!important;
 }
 
 .form-group textarea {
@@ -206,8 +212,10 @@ fieldset legend {
     border-right-color: #cc080f;
 }
 
-
-/* flex */
+.transparent{
+    background-color: transparent;
+    border: none;
+}
 
 .flex {
     display: flex;

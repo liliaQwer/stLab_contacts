@@ -61,7 +61,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _searchForm.onsubmit = function (e) {
             e.preventDefault();
             var validationResult = validateData();
-            if (!validationResult.isValid){
+            if (!validationResult.isValid) {
                 showMessageError(validationResult.errorList.join(", "));
                 return;
             }
@@ -78,9 +78,11 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
                 country: _countryElement.value,
                 city: _cityElement.value,
                 street: _streetElement.value,
-                postalCode: _postalCodeElement.value
+                postalCode: _postalCodeElement.value,
+                birthdayOperator: '',
+                birthday: ''
             };
-            if (_birthdayElement.value){
+            if (_birthdayElement.value) {
                 _contactData.birthdayOperator = _birthdayOperatorElement.value;
                 _contactData.birthday = _birthdayElement.value;
             }
@@ -102,19 +104,19 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _messageErrorElement.innerText = error;
     }
 
-    function validateData(){
+    function validateData() {
         var validationResult = {
             errorList: [],
             isValid: false
         }
-        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)){
+        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_POSTAL_CODE);
         }
 
-        if (_birthdayElement.value && !appUtils.isValidDate(_birthdayElement.value)){
+        if (_birthdayElement.value && !appUtils.isValidDate(_birthdayElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_DATE)
         }
-        if (validationResult.errorList.length == 0){
+        if (validationResult.errorList.length == 0) {
             validationResult.isValid = true;
         }
         return validationResult;

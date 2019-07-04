@@ -1,5 +1,6 @@
 package dao;
 
+import com.fasterxml.jackson.databind.ser.std.StdJdkSerializers;
 import model.Contact;
 import org.apache.logging.log4j.LogManager;
 import utils.*;
@@ -83,6 +84,7 @@ public class ContactDAO implements DAO<Contact> {
                 contact.setPatronymic(rs.getString("patronymic"));
                 contact.setBirthday(rs.getObject("birthday", LocalDate.class));
                 contact.setCompany(rs.getString("company"));
+                contact.setEmail(rs.getString("email"));
                 contactList.add(contact);
             }
             st.close();
@@ -101,6 +103,7 @@ public class ContactDAO implements DAO<Contact> {
 
     private PreparedStatement prepareSelectQueryAndStatemant(String query, SearchCriteria searchCriteria, Connection con,
                                                              boolean isTotalCountQuery) throws SQLException {
+        String operator = "Operator";
         StringBuilder sbQuery = new StringBuilder(query);//"select * from contact where active_status = ? limit ?,?"
         Field[] allFields = SearchCriteria.class.getDeclaredFields();
         List<String> fieldNames = Arrays.stream(allFields).map(field -> field.getName()).collect(Collectors.toList());
@@ -118,16 +121,19 @@ public class ContactDAO implements DAO<Contact> {
             return false;
         }).forEach(field -> {
             try {
-                //if fieldName contains 'operator', set its value to query string
-                if (field.getName().contains("Operator")){
-                    String columnName = field.getName().replace("Operator", "");
-                    sbQuery.append(fieldsDictionary.get(columnName)).append(field.get(searchCriteria)).append("? and ");
+                String fieldName = field.getName();
+                if (fieldName.contains(operator)){
                     return;
+                }
+                // if this field has appropriate operator
+                if (fieldNames.stream().anyMatch(name -> name.equals(fieldName + operator))) {
+                    //find this operator and use it in the query string
+                    Field operatorField = Arrays.stream(allFields).filter(tempField ->
+                            tempField.getName().equals(fieldName + operator))
+                            .collect(Collectors.toList()).get(0);
+                    sbQuery.append(fieldsDictionary.get(fieldName)).append(operatorField.get(searchCriteria)).append("? and ");
                 }else{
-                    //append field to query string  if it doesn't have appropriate operator field
-                    if (!fieldNames.stream().anyMatch(name -> name.equals(field.getName() + "Operator"))) {
-                        sbQuery.append(fieldsDictionary.get(field.getName())).append("=? and ");
-                    }
+                    sbQuery.append(fieldsDictionary.get(fieldName)).append("=? and ");
                 }
                 if (field.getType() == Integer.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->

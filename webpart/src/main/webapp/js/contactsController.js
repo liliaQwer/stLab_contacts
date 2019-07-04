@@ -249,13 +249,22 @@ App.ContactsController = (function (appConstants, appUtils, appLookup) {
         };
 
         _sendEmailButton.onclick = function () {
-            var idList = getCheckedIdList().join(",");
-            if (idList.length == 0) {
+            var idList = getCheckedIdList();
+            var idListStr= idList.join(",");
+            if (idListStr.length == 0) {
                 alert(appConstants.messages.SELECT_CONTACT_WARNING);
                 return;
             }
+            //if selected contacts have email
+            var emailList = _contactsList.contactsList.filter(function (contact) {
+                return (idList.indexOf(contact.id) >= 0 && contact.email)
+            });
+            if(emailList.length == 0){
+                alert(appConstants.messages.NO_CONTACTS_EMAIL);
+                return;
+            }
             if (_callbacks.onSendEmail && typeof _callbacks.onSendEmail == 'function') {
-                _callbacks.onSendEmail(idList);
+                _callbacks.onSendEmail(idListStr);
             }
         };
 

@@ -7,14 +7,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class DateFormatter {
-    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public static String formatDate(LocalDate date) {
         return date.format(formatter);
     }
 
-    public static LocalDate parseDate(String date) throws ParseException {
-        if (date != null && date != "") {
+    public static LocalDate parseDate(String date){
+        if (date != null && !date.equals("")) {
             return LocalDate.parse(date, formatter);
         }
         return null;

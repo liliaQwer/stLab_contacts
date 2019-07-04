@@ -9,6 +9,7 @@ App.Constants = {
         DELETE_PHONE_CONFIRMATION: "Are you sure you want to delete selected phones?",
         DELETE_ATTACHMENT_CONFIRMATION: "Are you sure you want to delete selected attachments?",
         SELECT_CONTACT_WARNING: "You should check a contact!",
+        NO_CONTACTS_EMAIL: "Selected contacts don't have emails!",
         SELECT_PHONE_WARNING: "You should check a phone!",
         SELECT_PHOTO_WARNING: "You should select a profile photo!",
         SELECT_ATTACHMENT_WARNING: "You should check an attachment!",
@@ -17,6 +18,7 @@ App.Constants = {
         FULL_PHONE_LENGTH_INVALID: "Full phone number should be 15 digits or shorter",
         INVALID_PROFILE_PHOTO_FILE: "Only images are allowed for a profile photo",
         REQUIRED_NAME: "Name is required",
+        NAME_IS_TOO_LONG: "Name is too long",
         REQUIRED_SURNAME: "Surname is required",
         INVALID_MAIL: "Email is invalid",
         INVALID_SITE: "Site is invalid",
@@ -33,7 +35,7 @@ App.Constants = {
         attachment: "attachments",
         email: "email"
     },
-    patterns:{
+    patterns: {
         email: /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
         site: /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
     }

@@ -413,10 +413,10 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         _contactForm.onsubmit = function (e) {
             e.preventDefault();
             var validationResult = validateData();
-            if (validationResult.isValid){
+            if (validationResult.isValid) {
                 refreshContactData();
                 saveContact();
-            }else {
+            } else {
                 showMessageError(validationResult.errorList.join(", "));
             }
         }
@@ -426,31 +426,35 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         }
     }
 
-    function validateData(){
+    function validateData() {
         var validationResult = {
             errorList: [],
             isValid: false
         }
-        if (!_nameElement.value){
+        if (!_nameElement.value) {
             validationResult.errorList.push(appConstants.messages.REQUIRED_NAME);
+        } else {
+            if (_nameElement.value.length > 30) {
+                validationResult.errorList.push(appConstants.messages.NAME_IS_TOO_LONG);
+            }
         }
-        if (!_surnameElement.value){
+        if (!_surnameElement.value) {
             validationResult.errorList.push(appConstants.messages.REQUIRED_SURNAME);
         }
-        if (_emailElement.value && !appConstants.patterns.email.test(_emailElement.value)){
+        if (_emailElement.value && !appConstants.patterns.email.test(_emailElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_MAIL);
         }
-        if (_siteElement.value && !appConstants.patterns.site.test(_siteElement.value)){
+        if (_siteElement.value && !appConstants.patterns.site.test(_siteElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_SITE);
         }
-        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)){
+        if (_postalCodeElement.value && isNaN(_postalCodeElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_POSTAL_CODE);
         }
 
-        if (_birthdayElement.value && !utils.isValidDate(_birthdayElement.value)){
+        if (_birthdayElement.value && !utils.isValidDate(_birthdayElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_DATE)
         }
-        if (validationResult.errorList.length == 0){
+        if (validationResult.errorList.length == 0) {
             validationResult.isValid = true;
         }
         return validationResult;

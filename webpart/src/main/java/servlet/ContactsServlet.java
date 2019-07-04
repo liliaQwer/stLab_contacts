@@ -2,7 +2,6 @@ package servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.ContactFull;
-import model.Phone;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -39,19 +38,18 @@ import java.util.stream.Collectors;
 @WebServlet(urlPatterns = {"/contacts/*"})
 public class ContactsServlet extends HttpServlet implements JsonSendable {
     private final static Logger logger = LogManager.getLogger(ContactsServlet.class);
-    private static final int THRESHOLD_SIZE = 1024 * 1024 * 3;  // 3MB
-    private static final int MAX_FILE_SIZE = 1024 * 1024 * 40; // 40MB
+    private static final int THRESHOLD_SIZE = 1024 * 1024 * 50;  // 50MB
+    private static final int MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
     private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
-    private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
-    private Pattern VALID_SITE_ADDRESS_REGEX = Pattern.compile("^(http:\\/\\/|https:\\/\\/)?(www.)?([a-zA-Z0-9]+).[a-zA-Z0-9]*.[a-z]{3}.?([a-z]+)?$", Pattern.CASE_INSENSITIVE);
+    private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile(Message.VALID_EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
+    private Pattern VALID_SITE_ADDRESS_REGEX = Pattern.compile(Message.VALID_SITE_PATTERN, Pattern.CASE_INSENSITIVE);
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
     private ContactService service;
 
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         if (request.getPathInfo() == null) {
             getContactList(request, response);
         } else {
@@ -95,7 +93,7 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)  {
         // checks if the request actually contains upload file
         if (!ServletFileUpload.isMultipartContent(request)) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -159,9 +157,8 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
             sendJsonResponse(response, new ApplicationException());
             return;
         }
-        ContactsAndSearchCriteria contactsPageView = null;
+        ContactsAndSearchCriteria contactsPageView;
         try {
-            service.getPage(searchCriteria);
             contactsPageView = ViewHelper.prepareContactsAndPageInfoView(service.getPage(searchCriteria),
                     searchCriteria, service.getCount(searchCriteria));
             sendJsonResponse(response, contactsPageView);
@@ -198,7 +195,7 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
         return searchCriteria;
     }
 
-    private void getContact(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void getContact(HttpServletRequest request, HttpServletResponse response){
         try {
             ContactFull contact = service.get(getIdFromPath(request));
             ContactView view = ViewHelper.prepareContactView(contact);
@@ -210,7 +207,7 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response){
         if (request.getPathInfo() == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             sendJsonResponse(response, new ApplicationException());

@@ -312,11 +312,11 @@
                     </div>
                     <div class="form-group">
                         <label for="operatorCode">Operator code</label>
-                        <input id="operatorCode" min="0" required maxlength="2" minlength="2" type="number" value="{{operatorCode}}">
+                        <input id="operatorCode" min="10" max="99" required type="number" value="{{operatorCode}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone number</label>
-                        <input id="phoneNumber" min="0" minlength="7" maxlength="7" required type="number" value="{{phoneNumber}}">
+                        <input id="phoneNumber" min="1000000" max="9999999" required type="number" value="{{phoneNumber}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneType">Phone type:</label>

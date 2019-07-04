@@ -26,11 +26,15 @@ public class ContactServiceImpl implements ContactService {
     private DAO phoneDAO;
 
     public ContactServiceImpl(DataSource dataSource) {
+        this(dataSource, new ContactDAO(), new AddressDAO(), new AttachmentDAO(), new PhoneDAO());
+    }
+
+    public ContactServiceImpl(DataSource dataSource, DAO<Contact> contactDAO, DAO<Address> addressDAO, DAO<Attachment> attachmentDAO, DAO<Phone> phoneDAO) {
         this.dataSource = dataSource;
-        this.contactDAO = new ContactDAO();
-        this.addressDAO = new AddressDAO();
-        this.attachmentDAO = new AttachmentDAO();
-        this.phoneDAO = new PhoneDAO();
+        this.contactDAO = contactDAO;
+        this.addressDAO = addressDAO;
+        this.attachmentDAO = attachmentDAO;
+        this.phoneDAO = phoneDAO;
     }
 
     @Override

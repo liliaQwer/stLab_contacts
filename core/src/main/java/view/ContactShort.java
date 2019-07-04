@@ -16,6 +16,7 @@ public class ContactShort {
     private String birthday;
     private String company;
     private String address;
+    private String email;
 
     public ContactShort(ContactFull model){
         this.id = model.getContact().getId();
@@ -23,6 +24,7 @@ public class ContactShort {
         LocalDate birthday = model.getContact().getBirthday();
         this.birthday = birthday != null ? DateFormatter.formatDate(birthday) : null;
         this.address = prepareAddress(model.getAddress());
+        this.email = model.getContact().getEmail();
         this.fullName = prepareFullName(model.getContact().getName(), model.getContact().getSurname(), model.getContact().getPatronymic());
     }
 
@@ -59,4 +61,9 @@ public class ContactShort {
                 .collect(Collectors.joining(", "));
         return addressLine;
     }
+
+    public String getEmail() {
+        return email;
+    }
+
 }

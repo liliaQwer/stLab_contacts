@@ -30,14 +30,12 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         _streetElement,
         _postalCodeElement,
 
-        _cancelButton,
-
         _contactData,
         _contactForm,
         _lookupsData,
         _callbacks;
 
-    function init(contactId) {
+    function render(contactId) {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("contactTemplate").innerHTML;
@@ -86,14 +84,14 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
                 }
             })
             .then(function () {
-                render(true);
+                renderTemplate(true);
             })
             .catch(function (error) {
                 showMessageError(error || _errorMessage);
             });
     }
 
-    function render(isInitialRender) {
+    function renderTemplate(isInitialRender) {
         if (!isInitialRender) {
             refreshContactData();
         }
@@ -179,7 +177,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         if (data.id > 0 && _contactData.phoneInfo.updatedIds.indexOf(data.id) === -1) {
             _contactData.phoneInfo.updatedIds.push(data.id);
         }
-        render();
+        renderTemplate();
     }
 
     function updateAttachment(data) {
@@ -201,7 +199,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         if (data.id > 0 && _contactData.attachmentsInfo.updatedIds.indexOf(data.id) === -1) {
             _contactData.attachmentsInfo.updatedIds.push(data.id);
         }
-        render();
+        renderTemplate();
     }
 
     function editPhone(phoneId) {
@@ -245,7 +243,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             return markedForDeletion.indexOf(updatedId) === -1;
         });
 
-        render();
+        renderTemplate();
     }
 
     function deleteAttachments(ids) {
@@ -261,7 +259,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         _contactData.attachmentsInfo.updatedIds = _contactData.attachmentsInfo.updatedIds.filter(function (updatedId) {
             return markedForDeletion.indexOf(updatedId) === -1;
         });
-        render();
+        renderTemplate();
     }
 
     function updatePhoto(data) {
@@ -272,7 +270,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         var reader = new FileReader();
         reader.onloadend = function () {
             _contactData.profilePhoto.imgSrc = reader.result;
-            render();
+            renderTemplate();
         };
         reader.readAsDataURL(f);
         _contactData.profilePhoto.uploadedFile = data.uploadedFile;
@@ -307,8 +305,6 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
 
         _contactForm = document.getElementById("contactForm");
 
-        _cancelButton = document.getElementById('cancelButton');
-
         _addPhoneButton.onclick = function () {
             if (_callbacks.onAddPhone && typeof _callbacks.onAddPhone === 'function') {
                 _callbacks.onAddPhone(null, {
@@ -317,7 +313,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
                     }
                 })
             }
-        }
+        };
 
         if (_deletePhoneButton) {
             _deletePhoneButton.onclick = function () {
@@ -363,7 +359,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             if (_callbacks.onAddAttachment && typeof _callbacks.onAddAttachment === 'function') {
                 _callbacks.onAddAttachment(null);
             }
-        }
+        };
         if (_deleteAttachmentButton) {
             _deleteAttachmentButton.onclick = function () {
                 var inputElements = document.getElementsByClassName('attachment_check');
@@ -408,7 +404,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             if (_callbacks.onChangeProfilePhoto && typeof _callbacks.onChangeProfilePhoto === 'function') {
                 _callbacks.onChangeProfilePhoto(_profilePhotoElement);
             }
-        }
+        };
 
         _contactForm.onsubmit = function (e) {
             e.preventDefault();
@@ -420,17 +416,13 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
                 showMessageError(validationResult.errorList.join(", "));
             }
         }
-
-        _cancelButton.onclick = function () {
-            cancel();
-        }
     }
 
     function validateData() {
         var validationResult = {
             errorList: [],
             isValid: false
-        }
+        };
         if (!_nameElement.value) {
             validationResult.errorList.push(appConstants.messages.REQUIRED_NAME);
         }
@@ -551,7 +543,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
                     }
                 })
             }
-        }
+        };
         if (_contactData.profilePhoto.uploadedFile) {
             formData.append("profilePhoto", _contactData.profilePhoto.uploadedFile);
         }
@@ -569,7 +561,7 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
             .then(utils.handleError)
             .then(function () {
                 alert("Contact saved");
-                cancel();
+                window.location = '#' + appConstants.HASH_URL.contacts;
             })
             .catch(function (error) {
                 showMessageError(error || appConstants.messages.ERROR_MESSAGE);
@@ -578,12 +570,6 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
 
     function log(data) {
         console.log(data);
-    }
-
-    function cancel() {
-        if (_callbacks.onCancel && typeof _callbacks.onCancel === "function") {
-            _callbacks.onCancel();
-        }
     }
 
     function showMessageError(error) {
@@ -598,12 +584,11 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
     _callbacks = {
         onAddPhone: false,
         onAddAttachment: false,
-        onChangeProfilePhoto: false,
-        onCancel: false
+        onChangeProfilePhoto: false
     };
 
     return {
-        init: init,
+        render: render,
         updatePhone: updatePhone,
         updateAttachment: updateAttachment,
         updatePhoto: updatePhoto,

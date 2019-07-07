@@ -56,12 +56,25 @@ App.Utils = (function (appConstants) {
         }
     }
 
+    function parseRequestURL(){
+        var url = location.hash.slice(1).toLowerCase() || '/';
+        var r = url.split("/");
+        var request = {
+            resource: null,
+            params: null
+        };
+        request.resource = r[1];
+        request.params = r[2];
+        return request;
+    }
+
     return {
         merge: mergeObjects,
         encodeQueryString: encodeQueryString,
         handleError: handleError,
         isValidDate: isValidDate,
-        validateLength: validateLength
+        validateLength: validateLength,
+        parseRequestURL: parseRequestURL
     }
 
 })(App.Constants);

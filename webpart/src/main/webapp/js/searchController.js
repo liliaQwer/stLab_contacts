@@ -4,7 +4,6 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _messageErrorElement,
         _searchForm,
         _submitSearchFormButton,
-        _cancelButton,
         _nameElement,
         _surnameElement,
         _patronymicElement,
@@ -24,7 +23,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _lookupsData,
         _contactData;
 
-    function init() {
+    function render() {
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("searchTemplate").innerHTML;
         _messageErrorElement = document.getElementById("messageError");
@@ -32,11 +31,11 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         appLookup.getLookups()
             .then(function (data) {
                 _lookupsData = data;
-                render();
+                renderTemplate();
             });
     }
 
-    function render() {
+    function renderTemplate() {
         var rendered = Mustache.render(_mustacheTemplate, _lookupsData);
         _containerElement.innerHTML = rendered;
 
@@ -44,7 +43,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         _surnameElement = document.getElementById('surname');
         _patronymicElement = document.getElementById('patronymic');
         _birthdayElement = document.getElementById('birthday');
-        _birthdayOperatorElement = document.getElementById('birthdayOperator')
+        _birthdayOperatorElement = document.getElementById('birthdayOperator');
         _genderElement = document.getElementById('gender');
         _marital_statusElement = document.getElementById('marital_status');
         _nationalityElement = document.getElementById('nationality');
@@ -56,7 +55,6 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
 
         _searchForm = document.getElementById("searchForm");
         _submitSearchFormButton = document.getElementById("submitSearchFormButton");
-        _cancelButton = document.getElementById("cancelButton");
 
         _searchForm.onsubmit = function (e) {
             e.preventDefault();
@@ -91,12 +89,6 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
                 _callbacks.onSearch(_contactData);
             }
         };
-
-        _cancelButton.onclick = function () {
-            if (_callbacks.onCancel && typeof _callbacks.onCancel == 'function') {
-                _callbacks.onCancel();
-            }
-        }
     }
 
     function showMessageError(error) {
@@ -108,7 +100,7 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
         var validationResult = {
             errorList: [],
             isValid: false
-        }
+        };
         if (_postalCodeElement.value && isNaN(_postalCodeElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_POSTAL_CODE);
         }
@@ -123,12 +115,11 @@ App.SearchController = (function (appConstants, appLookup, appUtils) {
     }
 
     _callbacks = {
-        onCancel: false,
         onSearch: false
     };
 
     return {
-        init: init,
+        render: render,
         callbacks: _callbacks
     }
 }(App.Constants, App.LookupRepository, App.Utils));

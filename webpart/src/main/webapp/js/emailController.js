@@ -11,26 +11,25 @@ App.EmailController = function (appConstants, utils) {
         _templateElement,
 
         _sendEmailForm,
-        _cancelButton,
-
+        _contactIdList,
         _templateList,
-        _emailList,
-        _callbacks;
+        _emailList;
 
-    function init(contactIdList) {
+    function render() {
         _messageErrorElement = document.getElementById("messageError");
         _containerElement = document.getElementById("mainContainer");
         _mustacheTemplate = document.getElementById("sendEmailTemplate").innerHTML;
         _loaderContainer = document.getElementById("loaderContainer");
         _loaderModal = new Modal(_loaderContainer, {
-            closeOnEscape: false,
-            closeOnClickOutside: false}
-            );
+                closeOnEscape: false,
+                closeOnClickOutside: false
+            }
+        );
 
         hideErrorMessage();
 
         _errorMessage = appConstants.messages.ERROR_MESSAGE;
-        fetch(appConstants.URL.email + "?ids=" + contactIdList)
+        fetch(appConstants.URL.email + "?ids=" + _contactIdList)
             .then(utils.handleError)
             .then(function (data) {
                 if (data) {
@@ -41,7 +40,7 @@ App.EmailController = function (appConstants, utils) {
             .then(function (data) {
                 if (data) {
                     _templateList = data.templateList;
-                    render();
+                    renderTemplate();
                 }
             })
             .catch(function (error) {
@@ -57,7 +56,11 @@ App.EmailController = function (appConstants, utils) {
             })
     }
 
-    function render() {
+    function setData(data) {
+        _contactIdList = data;
+    }
+
+    function renderTemplate() {
 
         var rendered = Mustache.render(_mustacheTemplate, {
             templateList: _templateList,
@@ -71,11 +74,6 @@ App.EmailController = function (appConstants, utils) {
         _textElement = document.getElementById('text');
 
         _sendEmailForm = document.getElementById("sendEmailForm");
-        _cancelButton = document.getElementById("cancelButton");
-
-        _cancelButton.onclick = function () {
-            cancel();
-        };
 
         _templateElement.onchange = function (e) {
             var templateName = e.target.value;
@@ -111,7 +109,7 @@ App.EmailController = function (appConstants, utils) {
                         _loaderModal.hide();
                         setTimeout(function () {
                             alert(data.message);
-                            cancel();
+                            window.location = '#' + appConstants.HASH_URL.contacts;
                         }, 1);
 
                     })
@@ -133,18 +131,8 @@ App.EmailController = function (appConstants, utils) {
         _messageErrorElement.classList.add('hidden');
     }
 
-    function cancel() {
-        if (_callbacks.onCancel && typeof _callbacks.onCancel == 'function') {
-            _callbacks.onCancel();
-        }
-    }
-
-    _callbacks = {
-        onCancel: false
-    };
-
     return {
-        init: init,
-        callbacks: _callbacks
+        render: render,
+        setData: setData
     }
 }(App.Constants, App.Utils);

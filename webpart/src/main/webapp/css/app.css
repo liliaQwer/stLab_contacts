@@ -60,14 +60,14 @@ th {
     border-radius: 5px;
 }
 
-.clearSearch{
+.clearSearch {
     background-color: #d5d3d3;
     padding: 5px;
     color: #565656;
     border-radius: 5px;
 }
 
-.clearSearch:hover{
+.clearSearch:hover {
     background-color: #aec6ef;
     cursor: pointer;
 }
@@ -82,9 +82,10 @@ th {
     cursor: pointer;
     font-family: Arial;
     font-size: 16px;
+    text-decoration: none;
 }
 
-.button:not(.disabledPaging):hover ,.modal .footer label:hover{
+.button:not(.disabledPaging):hover, .modal .footer label:hover {
     background-color: #aec6ef;
     cursor: pointer;
 }
@@ -130,7 +131,8 @@ th {
 .cursor-pointer {
     cursor: pointer;
 }
-.link{
+
+.link {
     text-decoration: underline;
     color: darkslateblue;
     cursor: pointer;
@@ -178,7 +180,7 @@ fieldset legend {
     flex-basis: 120px;
 }
 
-.flex-basis-400{
+.flex-basis-400 {
     flex-basis: 400px;
 }
 
@@ -189,11 +191,13 @@ fieldset legend {
     border-right: 3px solid #ccc;
     flex-basis: 250px;
 }
-.operator{
-    flex-basis: 50px!important;
+
+.operator {
+    flex-basis: 50px !important;
 }
-#birthday{
-    flex-basis: 170px!important;
+
+#birthday {
+    flex-basis: 170px !important;
 }
 
 .form-group textarea {
@@ -212,7 +216,7 @@ fieldset legend {
     border-right-color: #cc080f;
 }
 
-.transparent{
+.transparent {
     background-color: transparent;
     border: none;
 }

@@ -35,8 +35,8 @@
             </select>
         </div>
         <div id="controlButtonsBlock">
-            <div class="button marginLeft5" id="addContact">Add Contact</div>
-            <div class="button marginLeft5" id="searchContact">Search Contact</div>
+            <a class="button marginLeft5" href="#/contact" id="addContact">Add Contact</a>
+            <a class="button marginLeft5" href="#/search" id="searchContact">Search Contact</a>
         </div>
     </div>
     <div id="contactsListBlock">
@@ -52,14 +52,14 @@
             {{#contactsList}}
             <tr>
                 <td><input type="checkbox" class="check" value="{{id}}" id="checkFor_{{id}}"></td>
-                <td><span class="link editContact" data-id="{{id}}">{{fullName}}</span></td>
+                <td><a class="link editContact" data-id="{{id}}" href="#/contacts/{{id}}">{{fullName}}</a></td>
                 <td align="right">{{birthday}}</td>
                 <td>{{address}}</td>
                 <td>{{company}}</td>
                 <td align="center">
-                        <span class="cursor-pointer editContact" data-id="{{id}}">
-                            <img src="img/edit.png" alt="Edit contact" class="editImage">
-                        </span>
+                    <a class="cursor-pointer editContact" href="#/contacts/{{id}}" data-id="{{id}}">
+                        <img src="img/edit.png" alt="Edit contact" class="editImage">
+                    </a>
                     <span class="cursor-pointer deleteContact" data-id="{{id}}">
                             <img src="img/delete.png" alt="Delete contact" class="editImage marginLeft25">
                         </span>
@@ -119,17 +119,20 @@
 
                     <div class="form-group">
                         <label for="surname">Surname:</label>
-                        <input id="surname" type="text" maxlength="40" required placeholder="Enter surname" value="{{surname}}"/>
+                        <input id="surname" type="text" maxlength="40" required placeholder="Enter surname"
+                               value="{{surname}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="patronymic">Patronymic:</label>
-                        <input id="patronymic" type="text" maxlength="40" placeholder="Enter patronymic" value="{{patronymic}}"/>
+                        <input id="patronymic" type="text" maxlength="40" placeholder="Enter patronymic"
+                               value="{{patronymic}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
-                        <input id="birthday" type="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="Enter birthday" value="{{birthday}}"/>
+                        <input id="birthday" type="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                               placeholder="Enter birthday" value="{{birthday}}"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -166,7 +169,8 @@
 
                     <div class="form-group">
                         <label for="nationality">Nationality:</label>
-                        <input id="nationality" type="text" maxlength="20" placeholder="Enter nationality" value="{{nationality}}"/>
+                        <input id="nationality" type="text" maxlength="20" placeholder="Enter nationality"
+                               value="{{nationality}}"/>
                     </div>
                 </div>
             </div>
@@ -193,7 +197,8 @@
 
                     <div class="form-group">
                         <label for="postalCode">Postal code:</label>
-                        <input id="postalCode" type="number" max="999999" min="0"  placeholder="Enter postal code" value="{{postalCode}}"/>
+                        <input id="postalCode" type="number" max="999999" min="0" placeholder="Enter postal code"
+                               value="{{postalCode}}"/>
                     </div>
                 </div>
                 {{/addressInfo}}
@@ -286,7 +291,7 @@
                 {{/attachmentsInfo}}
             </div>
         </fieldset>
-        <input type="button" class="button" id="cancelButton" value="Cancel"/>
+        <a type="button" class="button" id="cancelButton" href="#/contacts">Cancel</a>
         <input type="submit" class="button" value="Save"/>
     </form>
     <div id="editPhoneContainer"></div>
@@ -316,7 +321,8 @@
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone number</label>
-                        <input id="phoneNumber" min="10000" max="999999999999" required type="number" value="{{phoneNumber}}">
+                        <input id="phoneNumber" min="10000" max="999999999999" required type="number"
+                               value="{{phoneNumber}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneType">Phone type:</label>
@@ -423,7 +429,8 @@
                             <option value=">">Greater</option>
                             <option value="<">Less</option>
                         </select>
-                        <input id="birthday" type="date"  pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="Enter birthday"/>
+                        <input id="birthday" type="date" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+                               placeholder="Enter birthday"/>
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
@@ -451,7 +458,7 @@
                 <div class="flex flex-column flex-basis-400">
                     <div class="form-group">
                         <label for="country">Country:</label>
-                        <input id="country" type="text"  placeholder="Enter country" value="{{country}}"/>
+                        <input id="country" type="text" placeholder="Enter country" value="{{country}}"/>
                     </div>
 
                     <div class="form-group">
@@ -473,7 +480,7 @@
             </div>
         </fieldset>
         <div>
-            <button type="button" class="button" id="cancelButton">Cancel</button>
+            <a type="button" class="button" id="cancelButton" href="#/contacts">Cancel</a>
             <button type="submit" class="button" id="submitSearchFormButton">Search</button>
         </div>
     </form>
@@ -504,12 +511,13 @@
                 </div>
                 <div class="form-group">
                     <label for="text">Text:</label>
-                    <textarea rows="5" cols="30" id="text" required type="date" placeholder="Enter email text"></textarea>
+                    <textarea rows="5" cols="30" id="text" required type="date"
+                              placeholder="Enter email text"></textarea>
                 </div>
             </div>
         </fieldset>
         <div>
-            <button type="button" class="button" id="cancelButton">Cancel</button>
+            <a type="button" class="button" id="cancelButton" href="#/contacts">Cancel</a>
             <button type="submit" class="button" id="submitSendEmailFormButton">Send email</button>
         </div>
     </form>
@@ -532,6 +540,8 @@
 <script type="text/javascript" src="js/contactsController.js"></script>
 <script type="text/javascript" src="js/searchController.js"></script>
 <script type="text/javascript" src="js/emailController.js"></script>
+<script type="text/javascript" src="js/router.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
 </body>
+
 </html>

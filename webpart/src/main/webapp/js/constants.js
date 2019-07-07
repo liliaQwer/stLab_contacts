@@ -36,6 +36,13 @@ App.Constants = {
         attachment: "attachments",
         email: "email"
     },
+    HASH_URL: {
+        contacts: '/contacts',
+        editContact: '/contacts/id',
+        addContact: '/contact',
+        search: '/search',
+        email: '/email'
+    },
     patterns: {
         email: /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
         site: /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/

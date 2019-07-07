@@ -9,6 +9,7 @@ public class AttachmentView {
     private String fileName;
     private String uploadDate;
     private String comment;
+    private String uuid;
 
     public AttachmentView(Attachment attachment) {
         this.uploadDate = DateFormatter.formatDate(attachment.getUploadDate());
@@ -16,6 +17,7 @@ public class AttachmentView {
         this.fileName = attachment.getFileName();
         this.comment = attachment.getComment();
         this.contactId = attachment.getContactId();
+        this.uuid = attachment.getUuid();
     }
 
     public AttachmentView() {
@@ -61,5 +63,13 @@ public class AttachmentView {
 
     public void setUploadDate(String uploadDate) {
         this.uploadDate = uploadDate;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

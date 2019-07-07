@@ -11,10 +11,7 @@ import org.apache.logging.log4j.Logger;
 import service.ContactService;
 import service.ContactServiceImpl;
 import upload.FileHelper;
-import utils.ApplicationException;
-import utils.DateFormatter;
-import utils.Message;
-import utils.SearchCriteria;
+import utils.*;
 import view.ContactView;
 import view.ContactsAndSearchCriteria;
 import view.MessageInfo;
@@ -32,7 +29,6 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @WebServlet(urlPatterns = {"/contacts/*"})
@@ -41,8 +37,6 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
     private static final int THRESHOLD_SIZE = 1024 * 1024 * 50;  // 50MB
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 50; // 50MB
     private static final int MAX_REQUEST_SIZE = 1024 * 1024 * 50; // 50MB
-    private Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile(Message.VALID_EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
-    private Pattern VALID_SITE_ADDRESS_REGEX = Pattern.compile(Message.VALID_SITE_PATTERN, Pattern.CASE_INSENSITIVE);
 
     @Resource(name = "jdbc/mySqlDb")
     private DataSource dataSource;
@@ -78,13 +72,10 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
                 } else {
                     ObjectMapper mapper = new ObjectMapper();
                     contact = mapper.readValue(item.getString("UTF-8"), ContactView.class);
-                    validate(contact);
+                    Validator.validate(contact);
                 }
             }
-            service.edit(contact);
-            int contactId = contact.getId();
-            FileHelper fileCreator = FileHelper.getInstance();
-            fileItems.forEach(item -> fileCreator.upload(item, contactId));
+            service.edit(contact, fileItems);
             sendJsonResponse(response, new MessageInfo(Message.CONTACT_UPDATED));
         } catch (ApplicationException ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -95,9 +86,7 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)  {
         // checks if the request actually contains upload file
-        if (!ServletFileUpload.isMultipartContent(request)) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            sendJsonResponse(response, new ApplicationException());
+        if (!isMultipartContent(request, response)){
             return;
         }
 
@@ -115,13 +104,10 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
                 } else {
                     ObjectMapper mapper = new ObjectMapper();
                     contact = mapper.readValue(item.getString("UTF-8"), ContactView.class);
-                    validate(contact);
+                    Validator.validate(contact);
                 }
             }
-            service.save(contact);
-            int contactId = contact.getId();
-            FileHelper fileCreator = FileHelper.getInstance();
-            fileItems.forEach(item -> fileCreator.upload(item, contactId));
+            service.save(contact, fileItems);
             sendJsonResponse(response, new MessageInfo(Message.CONTACT_SAVED));
         } catch (Exception ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -146,6 +132,14 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
         }
     }
 
+    private boolean isMultipartContent(HttpServletRequest request, HttpServletResponse response){
+        if (ServletFileUpload.isMultipartContent(request)) {
+            return true;
+        }
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        sendJsonResponse(response, new ApplicationException());
+        return false;
+    }
 
     private void getContactList(HttpServletRequest request, HttpServletResponse response) {
         SearchCriteria searchCriteria;
@@ -246,39 +240,6 @@ public class ContactsServlet extends HttpServlet implements JsonSendable {
     public void init() throws ServletException {
         super.init();
         service = new ContactServiceImpl(dataSource);
-    }
-
-    private void validate(ContactView contact)throws ApplicationException{
-        if(contact.getName() == null || contact.getName().isEmpty()){
-            throw new ApplicationException(Message.REQUIRED_NAME);
-        }
-        if(contact.getSurname() == null || contact.getSurname().isEmpty()){
-            throw new ApplicationException(Message.REQUIRED_SURNAME);
-        }
-        if (contact.getBirthday() != null){
-            try {
-                DateFormatter.parseDate(contact.getBirthday());
-            }catch (Exception e){
-                throw new ApplicationException(Message.INCORRECT_DATE_FORMAT);
-            }
-        }
-        if (contact.getEmail() != null && !contact.getEmail().isEmpty() && !VALID_EMAIL_ADDRESS_REGEX .matcher(contact.getEmail()).find()){
-            throw new ApplicationException(Message.INVALID_MAIL);
-        }
-        if (contact.getSite() != null && !contact.getSite().isEmpty() && !VALID_SITE_ADDRESS_REGEX .matcher(contact.getSite()).find()){
-            throw new ApplicationException(Message.INVALID_SITE);
-        }
-        String postalCOde = contact.getAddressInfo().getPostalCode();
-        if (postalCOde != null && !postalCOde.isEmpty() && postalCOde.length() != 6){
-            throw new ApplicationException(Message.INVALID_POSTAL_CODE);
-        }
-        if (postalCOde != null && !postalCOde.isEmpty()) {
-            try {
-                Integer.parseInt(postalCOde);
-            }catch (Exception e){
-                throw new ApplicationException(Message.INVALID_POSTAL_CODE);
-            }
-        }
     }
 
 }

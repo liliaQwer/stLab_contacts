@@ -2,8 +2,10 @@ package service;
 
 import dao.*;
 import model.*;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import upload.FileHelper;
 import utils.ApplicationException;
 import utils.Message;
 import utils.SearchCriteria;
@@ -108,7 +110,7 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public void edit(ContactView o) throws ApplicationException {
+    public void edit(ContactView o, List<FileItem> fileItemList) throws ApplicationException {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
@@ -130,20 +132,31 @@ public class ContactServiceImpl implements ContactService {
                     phoneDAO.save(connection, phone);
                 }
             }
+            FileHelper fileCreator = FileHelper.getInstance();
             AttachmentDetails attachmentDetails = o.getAttachmentsInfo();
             if (attachmentDetails.getDeletedIds() != null) {
                 for (Integer id : attachmentDetails.getDeletedIds()) {
+                    Attachment attachment = (Attachment)attachmentDAO.get(connection, id);
+                    fileCreator.deleteAttachment(attachment);
                     attachmentDAO.delete(connection, id);
                 }
             }
             for (AttachmentView attachmentView : attachmentDetails.getAttachmentsList()) {
                 attachmentView.setContactId(o.getId());
                 Attachment attachment = ViewHelper.prepareAttachment(attachmentView);
+                int  attachId;
                 if (attachment.getId() > 0) {
+                    attachId = attachment.getId();
                     attachmentDAO.edit(connection, attachment);
                 } else {
-                    attachmentDAO.save(connection, attachment);
+                    attachId = attachmentDAO.save(connection, attachment);
                 }
+                Attachment attach = ((Attachment)attachmentDAO.get(connection, attachId));// get attachment with uuid
+                fileItemList.stream().forEach(item -> {
+                    if (item.getFieldName().endsWith("_" + attachmentView.getId())){
+                        fileCreator.uploadAttachment(item, attach);
+                    }
+                });
             }
 
             connection.commit();
@@ -157,7 +170,7 @@ public class ContactServiceImpl implements ContactService {
                 }
             }
             throw new ApplicationException();
-        } catch (ParseException e) {
+        } catch (Exception e) {
             if (connection != null) {
                 try {
                     connection.rollback();
@@ -204,7 +217,7 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public void save(ContactView o) throws ApplicationException {
+    public void save(ContactView o, List<FileItem> fileItemList) throws ApplicationException {
         Connection connection = null;
         try {
             connection = dataSource.getConnection();
@@ -219,25 +232,33 @@ public class ContactServiceImpl implements ContactService {
                 o.getAddressInfo().setContactId(contactId);
                 addressDAO.save(connection, o.getAddressInfo());
             }
-            if (!o.getAttachmentsInfo().getAttachmentsList().isEmpty()) {
-                for (AttachmentView attachmentView : o.getAttachmentsInfo().getAttachmentsList()) {
-                    attachmentView.setContactId(contactId);
-                    Attachment attachment = null;
-                    try {
-                        attachment = ViewHelper.prepareAttachment(attachmentView);
-                    } catch (ParseException e) {
-                        logger.error(e);
-                        throw new ApplicationException(e.getMessage());
+            FileHelper fileCreator = FileHelper.getInstance();
+            for (AttachmentView attachmentView : o.getAttachmentsInfo().getAttachmentsList()) {
+                attachmentView.setContactId(contactId);
+                Attachment attachment = null;
+                try {
+                    attachment = ViewHelper.prepareAttachment(attachmentView);
+                } catch (ParseException e) {
+                    logger.error(e);
+                    throw new ApplicationException(e.getMessage());
+                }
+                int  attachId = attachmentDAO.save(connection, attachment);
+                Attachment attach = ((Attachment)attachmentDAO.get(connection, attachId));// get attachment with uuid
+                fileItemList.stream().forEach(item -> {
+                    if (item.getFieldName().endsWith("_" + attachmentView.getId())){
+                        fileCreator.uploadAttachment(item, attach);
                     }
-                    attachmentDAO.save(connection, attachment);
-                }
+                });
             }
-            if (!o.getPhoneInfo().getPhonesList().isEmpty()) {
-                for (Phone phone : o.getPhoneInfo().getPhonesList()) {
-                    phone.setContactId(contactId);
-                    phoneDAO.save(connection, phone);
-                }
+            for (Phone phone : o.getPhoneInfo().getPhonesList()) {
+                phone.setContactId(contactId);
+                phoneDAO.save(connection, phone);
             }
+            fileItemList.forEach(item -> {
+                if (item.getFieldName().equals("profilePhoto")){
+                    fileCreator.uploadProfilePhoto(item, contactId);
+                }
+            });
             connection.commit();
             connection.close();
         } catch (SQLException e) {

@@ -133,7 +133,12 @@ public class ContactDAO implements DAO<Contact> {
                             .collect(Collectors.toList()).get(0);
                     sbQuery.append(fieldsDictionary.get(fieldName)).append(operatorField.get(searchCriteria)).append("? and ");
                 }else{
-                    sbQuery.append(fieldsDictionary.get(fieldName)).append("=? and ");
+                    if (field.getType() == String.class){
+                        sbQuery.append(fieldsDictionary.get(fieldName)).append(" like ? and ");
+                    }else{
+                        sbQuery.append(fieldsDictionary.get(fieldName)).append("=? and ");
+                    }
+
                 }
                 if (field.getType() == Integer.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->
@@ -141,7 +146,7 @@ public class ContactDAO implements DAO<Contact> {
                     ));
                 } else if (field.getType() == String.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->
-                            statement.setString(idx, (String) value)
+                            statement.setString(idx, "%"+ value + "%")
                     ));
                 } else if (field.getType() == LocalDate.class) {
                     mapData.put(index.incrementAndGet(), new MapData(field.get(searchCriteria), (statement, idx, value) ->
@@ -239,23 +244,23 @@ public class ContactDAO implements DAO<Contact> {
         String updateQuery = "UPDATE contact SET name = ?, patronymic = ?, surname = ?, birthday = ?, company = ?, " +
                 "nationality = ?, marital_status_id = ?, site = ?, email = ?, gender_id = ?, profile_photo = ? WHERE (id = ?)";
         try {
-            PreparedStatement insertSt = connection.prepareStatement(updateQuery);
-            insertSt.setString(1, o.getName());
-            insertSt.setString(2, getStringOrNull(o.getPatronymic()));
-            insertSt.setString(3, o.getSurname());
-            insertSt.setDate(4, DateFormatter.convertToDatabaseColumn(o.getBirthday()), Calendar.getInstance());
+            PreparedStatement updateSt = connection.prepareStatement(updateQuery);
+            updateSt.setString(1, o.getName());
+            updateSt.setString(2, getStringOrNull(o.getPatronymic()));
+            updateSt.setString(3, o.getSurname());
+            updateSt.setDate(4, DateFormatter.convertToDatabaseColumn(o.getBirthday()), Calendar.getInstance());
             //insertSt.setObject(4, o.getBirthday(), Types.DATE);
-            insertSt.setString(5, getStringOrNull(o.getCompany()));
-            insertSt.setString(6, getStringOrNull(o.getNationality()));
-            insertSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
-            insertSt.setObject(8, getStringOrNull(o.getSite()));
-            insertSt.setString(9, getStringOrNull(o.getEmail()));
-            insertSt.setObject(10, o.getGender(), Types.INTEGER);
-            insertSt.setString(11, getStringOrNull(o.getProfilePhoto()));
-            insertSt.setInt(12, o.getId());
-            logger.info(insertSt.toString());
-            int result = insertSt.executeUpdate();
-            insertSt.close();
+            updateSt.setString(5, getStringOrNull(o.getCompany()));
+            updateSt.setString(6, getStringOrNull(o.getNationality()));
+            updateSt.setObject(7, o.getMaritalStatus(), Types.INTEGER);
+            updateSt.setObject(8, getStringOrNull(o.getSite()));
+            updateSt.setString(9, getStringOrNull(o.getEmail()));
+            updateSt.setObject(10, o.getGender(), Types.INTEGER);
+            updateSt.setString(11, getStringOrNull(o.getProfilePhoto()));
+            updateSt.setInt(12, o.getId());
+            logger.info(updateSt.toString());
+            int result = updateSt.executeUpdate();
+            updateSt.close();
             return result;
         } catch (SQLException e) {
             logger.error(e);

@@ -114,17 +114,17 @@
                 <div class="flex-grow-1 marginRight5">
                     <div class="form-group">
                         <label for="name">Name:</label>
-                        <input id="name" type="text" required placeholder="Enter name" value="{{name}}"/>
+                        <input id="name" type="text" maxlength="30" required placeholder="Enter name" value="{{name}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="surname">Surname:</label>
-                        <input id="surname" type="text" required placeholder="Enter surname" value="{{surname}}"/>
+                        <input id="surname" type="text" maxlength="40" required placeholder="Enter surname" value="{{surname}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="patronymic">Patronymic:</label>
-                        <input id="patronymic" type="text" placeholder="Enter patronymic" value="{{patronymic}}"/>
+                        <input id="patronymic" type="text" maxlength="40" placeholder="Enter patronymic" value="{{patronymic}}"/>
                     </div>
 
                     <div class="form-group">
@@ -153,20 +153,20 @@
                     </div>
                     <div class="form-group">
                         <label for="site">Site:</label>
-                        <input id="site" type="url" placeholder="Enter web site" value="{{site}}"/>
+                        <input id="site" type="url" maxlength="45" placeholder="Enter web site" value="{{site}}"/>
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input id="email" type="email" placeholder="Enter email" value="{{email}}"/>
+                        <input id="email" type="email" maxlength="50" placeholder="Enter email" value="{{email}}"/>
                     </div>
                     <div class="form-group">
                         <label for="company">Company:</label>
-                        <input id="company" type="text" placeholder="Enter company" value="{{company}}"/>
+                        <input id="company" type="text" maxlength="80" placeholder="Enter company" value="{{company}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="nationality">Nationality:</label>
-                        <input id="nationality" type="text" placeholder="Enter nationality" value="{{nationality}}"/>
+                        <input id="nationality" type="text" maxlength="20" placeholder="Enter nationality" value="{{nationality}}"/>
                     </div>
                 </div>
             </div>
@@ -178,22 +178,22 @@
                 <div class="flex-grow-1">
                     <div class="form-group">
                         <label for="country">Country:</label>
-                        <input id="country" type="text" placeholder="Enter country" value="{{country}}"/>
+                        <input id="country" type="text" maxlength="30" placeholder="Enter country" value="{{country}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="city">City:</label>
-                        <input id="city" type="text" placeholder="Enter city" value="{{city}}"/>
+                        <input id="city" type="text" maxlength="30" placeholder="Enter city" value="{{city}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="street">Street:</label>
-                        <input id="street" type="text" placeholder="Enter street" value="{{street}}"/>
+                        <input id="street" type="text" maxlength="45" placeholder="Enter street" value="{{street}}"/>
                     </div>
 
                     <div class="form-group">
                         <label for="postalCode">Postal code:</label>
-                        <input id="postalCode" type="number"  placeholder="Enter postal code" value="{{postalCode}}"/>
+                        <input id="postalCode" type="number" max="999999" min="0"  placeholder="Enter postal code" value="{{postalCode}}"/>
                     </div>
                 </div>
                 {{/addressInfo}}
@@ -269,7 +269,7 @@
                             <tr>
                                 <td><input type="checkbox" class="check attachment_check" value="{{id}}"
                                            id="checkFor_{{id}}"></td>
-                                <td>{{^isNew}}<a href="attachments/{{contactId}}/{{fileName}}">{{fileName}}</a>{{/isNew}}
+                                <td>{{^isNew}}<a href="attachments/{{contactId}}/{{uuid}}~{{fileName}}">{{fileName}}</a>{{/isNew}}
                                     {{#isNew}}{{fileName}}{{/isNew}}
                                 </td>
                                 <td>{{uploadDate}}</td>
@@ -308,15 +308,15 @@
                     <legend>Phone info</legend>
                     <div class="form-group">
                         <label for="countryCode">Country code</label>
-                        <input id="countryCode" min="0" maxlength="3" minlength="3" required type="number" value="{{countryCode}}">
+                        <input id="countryCode" min="1" max="999" required type="number" value="{{countryCode}}">
                     </div>
                     <div class="form-group">
                         <label for="operatorCode">Operator code</label>
-                        <input id="operatorCode" min="10" max="99" required type="number" value="{{operatorCode}}">
+                        <input id="operatorCode" min="1" max="9999" required type="number" value="{{operatorCode}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone number</label>
-                        <input id="phoneNumber" min="1000000" max="9999999" required type="number" value="{{phoneNumber}}">
+                        <input id="phoneNumber" min="10000" max="999999999999" required type="number" value="{{phoneNumber}}">
                     </div>
                     <div class="form-group">
                         <label for="phoneType">Phone type:</label>
@@ -406,15 +406,15 @@
                 <div class="flex flex-column flex-basis-400">
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input id="name" type="text" placeholder="Enter name"/>
+                        <input id="name" type="text" maxlength="30" placeholder="Enter name"/>
                     </div>
                     <div class="form-group">
                         <label for="surname">Surname:</label>
-                        <input id="surname" type="text" placeholder="Enter surname"/>
+                        <input id="surname" type="text" maxlength="40" placeholder="Enter surname"/>
                     </div>
                     <div class="form-group">
                         <label for="patronymic">Patronymic:</label>
-                        <input id="patronymic" type="text" placeholder="Enter patronymic"/>
+                        <input id="patronymic" type="text" maxlength="40" placeholder="Enter patronymic"/>
                     </div>
                     <div class="form-group">
                         <label for="birthday">Birthday:</label>
@@ -445,13 +445,13 @@
                     </div>
                     <div class="form-group">
                         <label for="nationality">Nationality:</label>
-                        <input id="nationality" type="text" placeholder="Enter nationality"/>
+                        <input id="nationality" type="text" maxlength="20" placeholder="Enter nationality"/>
                     </div>
                 </div>
                 <div class="flex flex-column flex-basis-400">
                     <div class="form-group">
                         <label for="country">Country:</label>
-                        <input id="country" type="text" placeholder="Enter country" value="{{country}}"/>
+                        <input id="country" type="text"  placeholder="Enter country" value="{{country}}"/>
                     </div>
 
                     <div class="form-group">

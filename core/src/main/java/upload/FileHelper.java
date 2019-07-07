@@ -1,10 +1,12 @@
 package upload;
 
+import model.Attachment;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class FileHelper {
@@ -46,24 +48,20 @@ public class FileHelper {
             logger.error(ex);
         }
     }
-    public static boolean upload(FileItem item, int contactId){
-        //System.out.println("content type = " + item.getContentType());
+    public boolean uploadProfilePhoto(FileItem item, int contactId){
         String fileName = item.getName();
         System.out.println("fileName = " + fileName);
         //build path: propertyLocation/contactId/fileName
         StringBuilder filePathSb = new StringBuilder();
-        if (item.getFieldName().equals("profilePhoto")){
-            filePathSb.append(profilePhotoLocation).append(File.separator).append(contactId);
-            File profileDir = new File(filePathSb.toString());
-            if (profileDir.exists()){
-                File[] profiles = profileDir.listFiles();
-                for(File profile: profiles){
-                    profile.delete();
-                }
+        filePathSb.append(profilePhotoLocation).append(File.separator).append(contactId);
+        File profileDir = new File(filePathSb.toString());
+        if (profileDir.exists()) {
+            File[] profiles = profileDir.listFiles();
+            for (File profile : profiles) {
+                profile.delete();
             }
-        }else{
-            filePathSb.append(attachmentLocation).append(File.separator).append(contactId);
         }
+
         new File(filePathSb.toString()).mkdirs();
         filePathSb.append(File.separator).append(fileName);
         File storeFile = new File(filePathSb.toString());
@@ -76,7 +74,7 @@ public class FileHelper {
         return true;
     }
 
-    public static void readAttachment(String requestedFile, OutputStream out) throws IOException {
+    public void readAttachment(String requestedFile, OutputStream out) throws IOException {
         File file = new File(attachmentLocation + requestedFile);
         if (!file.exists()){
             throw new FileNotFoundException();
@@ -91,10 +89,47 @@ public class FileHelper {
             logger.error(e);
             throw e;
         }
-
     }
 
-    public static void readProfilePhoto(String requestedFile, OutputStream out) throws IOException {
+    public boolean uploadAttachment(FileItem item, Attachment attachment){
+        String fileName = item.getName();
+        System.out.println("fileName = " + fileName);
+        //build path: propertyLocation/contactId/uuid-fileName
+        StringBuilder filePathSb = new StringBuilder();
+        filePathSb.append(attachmentLocation).append(File.separator).append(attachment.getContactId());
+        File contactDir = new File(filePathSb.toString());
+        contactDir.mkdirs();
+        //delete old attachment if exists
+        File[] files = contactDir.listFiles();
+        Arrays.stream(files).forEach(file -> {
+            if (file.getName().startsWith(attachment.getUuid())) {
+                file.delete();
+            }
+        });
+        filePathSb.append(File.separator).append(attachment.getUuid()).append("~").append(fileName);
+        System.out.println(filePathSb.toString());
+        File storeFile = new File(filePathSb.toString());
+        try {
+            item.write(storeFile);
+        } catch (Exception e) {
+            logger.error(e);
+            return false;
+        }
+        return true;
+    }
+
+    public void deleteAttachment(Attachment attachment) {
+        StringBuilder filePathSb = new StringBuilder();
+        filePathSb.append(attachmentLocation).append(File.separator).append(attachment.getContactId());
+        filePathSb.append(File.separator).append(attachment.getUuid()).append("~").append(attachment.getFileName());
+        System.out.println(filePathSb.toString());
+        File fileToDelete = new File(filePathSb.toString());
+        if (fileToDelete.exists()){
+            fileToDelete.delete();
+        }
+    }
+
+    public void readProfilePhoto(String requestedFile, OutputStream out) throws IOException {
         File file = new File(profilePhotoLocation + requestedFile);
         if (!file.exists()){
             file = new File(profilePhotoLocation + File.separator + defaultProfile);

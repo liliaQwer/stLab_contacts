@@ -104,18 +104,17 @@ public class EmailTemplateHelper {
                 });
 
         for(ContactEmail contactEmail: emails){
-            System.out.println("try to send " + contactEmail.getEmail());
+            logger.info("send mail  to " + contactEmail.getEmail());
             String emailText = null;
             if (template != null && !template.isEmpty()){
                 emailText = EmailTemplateHelper.getTemplate(template, contactEmail.getContactName());
             }else{
                 emailText = text;
             }
-            System.out.println("emailText" + emailText);
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(smtpProps.getProperty("mail.username")));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(contactEmail.getEmail()));
-            message.setSubject(subject);
+            message.setSubject(subject, "UTF-8");
             message.setText(emailText, "UTF-8");
             Transport.send(message);
         }

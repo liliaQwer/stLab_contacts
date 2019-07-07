@@ -98,16 +98,20 @@ App.EditPhoneController = (function (appConstants, utils) {
         var validationResult = {
             errorList: [],
             isValid: false
-        }
-        if (_countryCodeElement.value && (isNaN(_countryCodeElement.value) || _countryCodeElement.value.length != 3)){
+        };
+        if (_countryCodeElement.value && isNaN(_countryCodeElement.value)){
             validationResult.errorList.push(appConstants.messages.INVALID_COUNTRY_CODE);
         }
-        if (_operatorCodeElement.value && (isNaN(_operatorCodeElement.value) || _operatorCodeElement.value.length != 2)){
+        if (_operatorCodeElement.value && isNaN(_operatorCodeElement.value)){
             validationResult.errorList.push(appConstants.messages.INVALID_OPERATOR_CODE);
         }
-        if (_phoneNumberElement.value && (isNaN(_phoneNumberElement.value) || _phoneNumberElement.value.length != 7)){
+        if (_phoneNumberElement.value && isNaN(_phoneNumberElement.value)){
             validationResult.errorList.push(appConstants.messages.INVALID_PHONE_NUMBER);
         }
+        utils.validateLength(_countryCodeElement, validationResult, 3, "Country code");
+        utils.validateLength(_operatorCodeElement, validationResult, 4, "Operator code");
+        utils.validateLength(_phoneNumberElement, validationResult, 12, "Phone number");
+
         if (validationResult.errorList.length == 0){
             validationResult.isValid = true;
         }

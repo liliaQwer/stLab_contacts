@@ -25,6 +25,7 @@
         <mysql-connector-java>8.0.13</mysql-connector-java>
         <junit>4.12</junit>
         <mockito-all>1.10.19</mockito-all>
+        <commons-fileupload>1.3.3</commons-fileupload>
     </properties>
 
     <dependencies>
@@ -86,6 +87,12 @@
             <artifactId>mockito-all</artifactId>
             <version>${mockito-all}</version>
             <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload}</version>
         </dependency>
 
     </dependencies>

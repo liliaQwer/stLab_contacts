@@ -1,4 +1,4 @@
-App.Utils = (function () {
+App.Utils = (function (appConstants) {
     function mergeObjects() {
         var resObj = {};
         for (var i = 0; i < arguments.length; i += 1) {
@@ -50,12 +50,18 @@ App.Utils = (function () {
         }return day > 0 && day <= monthLength[month - 1];
     }
 
+    function validateLength(elem, validationResult, maxLength, fieldName) {
+        if (elem.value.length > maxLength) {
+            validationResult.errorList.push(appConstants.messages.FIELD_IS_TOO_LONG(fieldName, maxLength));
+        }
+    }
+
     return {
         merge: mergeObjects,
         encodeQueryString: encodeQueryString,
         handleError: handleError,
-        isValidDate: isValidDate
+        isValidDate: isValidDate,
+        validateLength: validateLength
     }
 
-
-})();
+})(App.Constants);

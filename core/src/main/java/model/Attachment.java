@@ -8,6 +8,7 @@ public class Attachment {
     private String fileName;
     private LocalDate uploadDate;
     private String comment;
+    private String uuid;
 
     public Attachment() {
     }
@@ -51,5 +52,13 @@ public class Attachment {
 
     public void setUploadDate(LocalDate uploadDate) {
         this.uploadDate = uploadDate;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

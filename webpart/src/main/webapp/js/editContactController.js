@@ -433,17 +433,15 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         }
         if (!_nameElement.value) {
             validationResult.errorList.push(appConstants.messages.REQUIRED_NAME);
-        } else {
-            if (_nameElement.value.length > 30) {
-                validationResult.errorList.push(appConstants.messages.NAME_IS_TOO_LONG);
-            }
         }
         if (!_surnameElement.value) {
             validationResult.errorList.push(appConstants.messages.REQUIRED_SURNAME);
         }
+
         if (_emailElement.value && !appConstants.patterns.email.test(_emailElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_MAIL);
         }
+
         if (_siteElement.value && !appConstants.patterns.site.test(_siteElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_SITE);
         }
@@ -454,11 +452,25 @@ App.EditContactController = (function (appConstants, utils, appLookup) {
         if (_birthdayElement.value && !utils.isValidDate(_birthdayElement.value)) {
             validationResult.errorList.push(appConstants.messages.INVALID_DATE)
         }
-        if (validationResult.errorList.length == 0) {
+
+        utils.validateLength(_nameElement, validationResult, 30, "Name");
+        utils.validateLength(_surnameElement, validationResult, 40, "Surname");
+        utils.validateLength(_patronymicElement, validationResult, 40, "Patronymic");
+        utils.validateLength(_companyElement, validationResult, 80, "Company");
+        utils.validateLength(_nationalityElement, validationResult, 20, "Nationality");
+        utils.validateLength(_siteElement, validationResult, 45, "Site");
+        utils.validateLength(_emailElement, validationResult, 50, "Email");
+        utils.validateLength(_countryElement, validationResult, 30, "Country");
+        utils.validateLength(_cityElement, validationResult, 30, "City");
+        utils.validateLength(_streetElement, validationResult, 45, "Street");
+        utils.validateLength(_postalCodeElement, validationResult, 6, "Postal code");
+
+        if (validationResult.errorList.length === 0) {
             validationResult.isValid = true;
         }
         return validationResult;
     }
+
 
     function refreshContactData() {
         _contactData = utils.merge({}, _contactData, {

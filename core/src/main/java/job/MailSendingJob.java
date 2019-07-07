@@ -19,7 +19,7 @@ public class MailSendingJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext){
-        System.out.println("I do my job");
+        logger.info("I do my job");
         JobDataMap data = jobExecutionContext.getJobDetail().getJobDataMap();
         DataSource dataSource = (DataSource)data.get("dataSource");
         ContactService contactService = new ContactServiceImpl(dataSource);

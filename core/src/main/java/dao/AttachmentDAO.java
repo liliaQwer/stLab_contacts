@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 public class AttachmentDAO implements DAO<Attachment> {
     private final static Logger logger = LogManager.getLogger(AttachmentDAO.class);
@@ -32,6 +33,7 @@ public class AttachmentDAO implements DAO<Attachment> {
                 attachment.setFileName(rs.getString("file_name"));
                 attachment.setComment(rs.getString("comment"));
                 attachment.setUploadDate(rs.getDate("upload_date").toLocalDate());
+                attachment.setUuid(rs.getString("uuid"));
                 attachmentList.add(attachment);
             }
         } catch (SQLException e) {
@@ -73,13 +75,26 @@ public class AttachmentDAO implements DAO<Attachment> {
 
     @Override
     public int save(Connection connection, Attachment o) throws SQLException {
-        String insertQuery = "INSERT INTO attachment (contact_id, file_name, comment, upload_date) VALUES (?, ?, ?, CURDATE())";
-        try (PreparedStatement st = connection.prepareStatement(insertQuery)){
-            st.setInt(1, o.getContactId());
-            st.setString(2, o.getFileName());
-            st.setString(3, o.getComment());
-            logger.info(st.toString());
-            return st.executeUpdate();
+        UUID uuid = UUID.randomUUID();
+        String randomUUIDString = uuid.toString();
+        String lastIdQuery = "SELECT last_insert_id()";
+        String insertQuery = "INSERT INTO attachment (contact_id, file_name, comment, upload_date, uuid) VALUES (?, ?, ?, CURDATE(), ?)";
+        try (PreparedStatement insertSt = connection.prepareStatement(insertQuery);
+                PreparedStatement lastIdSt = connection.prepareStatement(lastIdQuery)){
+            insertSt.setInt(1, o.getContactId());
+            insertSt.setString(2, o.getFileName());
+            insertSt.setString(3, o.getComment());
+            insertSt.setString(4,randomUUIDString);
+            logger.info(insertSt.toString());
+            int result = insertSt.executeUpdate();
+            if (result == 1) {
+                ResultSet rs = lastIdSt.executeQuery();
+                if (rs.next()) {
+                    result = rs.getInt(1);
+                }
+                return result;
+            }
+            return 0;
         } catch (SQLException e) {
             logger.error(e);
             throw e;
@@ -88,8 +103,26 @@ public class AttachmentDAO implements DAO<Attachment> {
 
 
     @Override
-    public Attachment get(Connection connection, int id){
-        return null;
+    public Attachment get(Connection connection, int id) throws SQLException{
+        String query = "select * from attachment where id = ?";
+        try (PreparedStatement st = connection.prepareStatement(query)){
+            st.setInt(1, id);
+            ResultSet rs = st.executeQuery();
+            if (rs.next()){
+                Attachment attachment = new Attachment();
+                attachment.setId(id);
+                attachment.setContactId(rs.getInt("contact_id"));
+                attachment.setFileName(rs.getString("file_name"));
+                attachment.setComment(rs.getString("comment"));
+                attachment.setUploadDate(rs.getDate("upload_date").toLocalDate());
+                attachment.setUuid(rs.getString("uuid"));
+                return attachment;
+            }
+            return null;
+        } catch (SQLException e) {
+            logger.error(e);
+            throw e;
+        }
     }
 
     @Override

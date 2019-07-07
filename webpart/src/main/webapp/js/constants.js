@@ -1,7 +1,6 @@
 App.Constants = {
     PAGE_NUMBER_DEFAULT: 1,
     PAGE_SIZE_DEFAULT: 10,
-    //DEFAULT_PROFILE_PHOTO: "img/no-user.jpg",
 
     messages: {
         ERROR_MESSAGE: "Error has occurred during request",
@@ -18,7 +17,9 @@ App.Constants = {
         FULL_PHONE_LENGTH_INVALID: "Full phone number should be 15 digits or shorter",
         INVALID_PROFILE_PHOTO_FILE: "Only images are allowed for a profile photo",
         REQUIRED_NAME: "Name is required",
-        NAME_IS_TOO_LONG: "Name is too long",
+        FIELD_IS_TOO_LONG: function (fieldName, maxLength) {
+            return fieldName + " is too long. Max length is " + maxLength
+        },
         REQUIRED_SURNAME: "Surname is required",
         INVALID_MAIL: "Email is invalid",
         INVALID_SITE: "Site is invalid",

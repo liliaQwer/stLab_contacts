@@ -30,7 +30,8 @@ public class AttachmentServlet extends HttpServlet implements JsonSendable{
         //exclude directory
         String fileName = requestedFile.substring(requestedFile.lastIndexOf(File.separator));
         String realFileName = fileName.substring(fileName.indexOf("~") + 1);
-        resp.setHeader("Content-disposition", "attachment;" + realFileName);
+
+        resp.setHeader("Content-disposition", "attachment;filename=" + realFileName);
 
         OutputStream out = resp.getOutputStream();
         FileHelper fileHelper = FileHelper.getInstance();

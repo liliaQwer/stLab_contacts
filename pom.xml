@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logging.log4j>2.11.1</logging.log4j>
         <com.fasterxml.jackson>2.9.6</com.fasterxml.jackson>
-        <quartz-scheduler>2.3.0</quartz-scheduler>
+        <quartz-scheduler>2.3.2</quartz-scheduler>
         <slf4j-api>1.7.7</slf4j-api>
         <commons-lang3>3.9</commons-lang3>
         <mysql-connector-java>8.0.13</mysql-connector-java>
